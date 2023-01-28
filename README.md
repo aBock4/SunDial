@@ -32,54 +32,39 @@ From photographers to astronomers, this app is perfect for everyone.
 
 As a user wanting to find the sun rise and set, I want to be able to see the time of those events upon opening the app.
 
-#STOPPED HERE
----
-_
+
 #### Dependencies
 
-Plant search data are available and accessible.  
+ 
 
 #### Assumptions
 
-Scientific names are stated in Latin.  
 
-Common names are stated in English.  
 
 #### Examples
 1.1  
 
-**Given** a feed of plant data is available  
+**Given**  
 
-**When**  I search for “Redbud”  
+**When**   
 
-**Then** I should receive at least one result with these attributes:  
+**Then**  
 
-Genus: Cercis  
-
-Species: canadensis  
-
-Common: Eastern Redbud  
 
 
 1.2  
-**Given** a feed of plant data is available  
+**Given**  
 
-**When** I search for “Quercus”  
+**When**   
 
-**Then** I should receive at least one result with these attributes:   
+**Then**  
 
-Genus: Quercus  
-Species: robur  
-Common: English Oak  
-And I should receive at least one result with these attributes:  
-Genus: Quercus  
-Species: alba  
-Common: White Oak  
+  
 
 1.3  
-**Given** a feed of plant data is available  
-**When** I search for “sklujapouetllkjsda;u”  
-**Then** I should receive zero results (an empty list) 
+**Given**  
+**When** 
+**Then**  
 
 
 ### Requirement 101: Search Locations and Receive Data
@@ -89,36 +74,128 @@ Common: White Oak
 As a user interested in when the sun will rise and/or set, I want to be able to search for a location so that I can figure out when the sun will rise/set for that location and/or set an alarm based off the time given.
 
 #### Dependencies
-Plant search data are available and accessible.  
-The device has a camera, and the user has granted access to the camera.  
-The device has GPS capabilities, and the user has granted location access.
+
+
 
 #### Assumptions  
-Scientific names are stated in Latin.  
-Common names are stated in English. 
+
+
 
 #### Examples  
 
-1.1
+1.1.  
+
 **Given** a feed of location data is available
+
 **When** I search for “New York”
+
 **Then** I should receive at least one result with these attributes:
+
         Sunrise: X:XX A.M.
         Sunset: X:XX P.M.
         Weather: Clear/Cloud/Rain/Stormy/etc.
 
 1.2
+
 **Given** a feed of location data is available
+
 **When** I search for “Cincinnati”
+
 **Then** I should receive at least one result with these attributes:
+
         Sunrise: X:XX A.M.
         Sunset: X:XX P.M.
         Weather: Clear/Cloud/Rain/Stormy/etc.
 
 1.3
+
 **Given** a feed of location data is available
+
 **When** I search for “sudnfsgsdfg”
+
 **Then** I should receive zero results
+
+
+### Requirement 102: Save Other Locations
+
+#### Scenario
+
+As a user wanting to be able to save other locations to view later.
+
+
+#### Dependencies
+
+ 
+
+#### Assumptions
+
+
+
+#### Examples
+1.1  
+
+**Given**  
+
+**When**   
+
+**Then**  
+
+
+
+1.2  
+**Given**  
+
+**When**   
+
+**Then**  
+
+  
+
+1.3  
+**Given**  
+**When** 
+**Then**  
+
+
+### Requirement 103: Some Other Requirement
+
+#### Scenario
+
+
+
+
+#### Dependencies
+
+ 
+
+#### Assumptions
+
+
+
+#### Examples
+1.1  
+
+**Given**  
+
+**When**   
+
+**Then**  
+
+
+
+1.2  
+**Given**  
+
+**When**   
+
+**Then**  
+
+  
+
+1.3  
+**Given**  
+**When** 
+**Then**  
 
 
 ## Class Diagram
@@ -126,25 +203,7 @@ Common names are stated in English.
 ![ClassDiagram](LinkToClassDiagramImage)
 
 ### Class Diagram Description
-
-
-**MainActivity:**  The first screen the user sees.  This will have a list of specimens, and an option to enter a new specimen.  
-
-**SpecimenDetailsActivity:**  A screen that shows details of a specimen.  
-
-**RetrofitInstance:** Boostrap class required for Retrofit.  
-
-**Plant:** Noun class that represents a plant.  
-
-**Specimen:** Noun class that represents a specimen.  
-
-**IPlantDAO:** Interface for Retrofit to find and parse Plant JSON.  
-
-**ISpecimenDAO:** Interface for Room to persist Specimen data  
-
----
-
-#STARTED BELOW
+  
 
 ## Scrum Roles
 
