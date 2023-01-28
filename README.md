@@ -4,12 +4,18 @@
 Design Document
 
 Jared Belmont
+
 Adam Bockhurst
+
 Summer Gasaway
+
 Eddie Greenlee
+
 Jackson Pinchot
 
+
 ## Introduction
+
 Have you ever wanted to watch the sunrise, but woke up too late or couldn't see it because of the weather? Have you ever wondered
 what time the sun would set in a different country as opposed to your own country? Enter SunDial. SunDial can:
 
@@ -22,13 +28,16 @@ in each location
 From photographers to astronomers, this app is perfect for everyone.
 
 ## Storyboard
+
 ![NameOfStoryBoard](LinkToImage)
 
 ## Functional Requirements
 
 ### Requirement 100.0: Automatically Populate User Location
 
+
 #### Scenario
+
 
 As a user wanting to find the sun rise and set, I want to be able to see the time of those events upon opening the app.
 
@@ -42,32 +51,47 @@ As a user wanting to find the sun rise and set, I want to be able to see the tim
 
 
 #### Examples
+
 1.1  
+
 
 **Given**  
 
+
 **When**   
+
 
 **Then**  
 
 
 
 1.2  
+
 **Given**  
+
 
 **When**   
 
+
 **Then**  
+
 
   
 
 1.3  
+
 **Given**  
+
+
 **When** 
+
+
 **Then**  
 
 
+
 ### Requirement 101: Search Locations and Receive Data
+
 
 #### Scenario
 
@@ -85,6 +109,7 @@ As a user interested in when the sun will rise and/or set, I want to be able to 
 
 1.1.  
 
+
 **Given** a feed of location data is available
 
 **When** I search for “New York”
@@ -96,6 +121,7 @@ As a user interested in when the sun will rise and/or set, I want to be able to 
         Weather: Clear/Cloud/Rain/Stormy/etc.
 
 1.2
+
 
 **Given** a feed of location data is available
 
@@ -109,11 +135,13 @@ As a user interested in when the sun will rise and/or set, I want to be able to 
 
 1.3
 
+
 **Given** a feed of location data is available
 
 **When** I search for “sudnfsgsdfg”
 
 **Then** I should receive zero results
+
 
 
 ### Requirement 102: Save Other Locations
@@ -132,7 +160,9 @@ As a user wanting to be able to save other locations to view later.
 
 
 #### Examples
+
 1.1  
+
 
 **Given**  
 
@@ -143,6 +173,8 @@ As a user wanting to be able to save other locations to view later.
 
 
 1.2  
+
+
 **Given**  
 
 **When**   
@@ -152,8 +184,12 @@ As a user wanting to be able to save other locations to view later.
   
 
 1.3  
+
+
 **Given**  
+
 **When** 
+
 **Then**  
 
 
@@ -173,29 +209,41 @@ As a user wanting to be able to save other locations to view later.
 
 
 #### Examples
+
 1.1  
+
 
 **Given**  
 
+
 **When**   
+
 
 **Then**  
 
 
 
 1.2  
+
 **Given**  
 
+
 **When**   
+
 
 **Then**  
 
   
 
 1.3  
+
+
 **Given**  
+
 **When** 
+
 **Then**  
+
 
 
 ## Class Diagram
