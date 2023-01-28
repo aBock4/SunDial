@@ -26,11 +26,14 @@ From photographers to astronomers, this app is perfect for everyone.
 
 ## Functional Requirements
 
-### Requirement 100.0: Search for Plants
+### Requirement 100.0: Automatically Populate User Location
 
 #### Scenario
 
-As a user interested in plants, I want to be able to search plants based on any part of the name: genus, species, cultivar, or common name.  
+As a user wanting to find the sun rise and set, I want to be able to see the time of those events upon opening the app.
+
+#STOPPED HERE
+---
 
 #### Dependencies
 
