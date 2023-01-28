@@ -3,15 +3,15 @@
 
 Design Document
 
-Jared Belmont
+- Jared Belmont
 
-Adam Bockhurst
+- Adam Bockhurst
 
-Summer Gasaway
+- Summer Gasaway
 
-Eddie Greenlee
+- Eddie Greenlee
 
-Jackson Pinchot
+- Jackson Pinchot
 
 
 ## Introduction
