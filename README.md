@@ -34,7 +34,7 @@ As a user wanting to find the sun rise and set, I want to be able to see the tim
 
 #STOPPED HERE
 ---
-
+_
 #### Dependencies
 
 Plant search data are available and accessible.  
@@ -79,40 +79,79 @@ Common: White Oak
 1.3  
 **Given** a feed of plant data is available  
 **When** I search for “sklujapouetllkjsda;u”  
-**Then** I should receive zero results (an empty list)  
+**Then** I should receive zero results (an empty list) _ 
 
 
-### Requirement 101: Save Specimen
+### Requirement 101: Search Locations and Receive Data
 
 #### Scenario
 
-As a user interested in plants, I want to be able to enter and save details of a specimen: date planted, photos, and locations, so that I can view a history of this plant.  
+As a user interested in when the sun will rise and/or set, I want to be able to search for a location so that I can figure out when the sun will rise/set for that location and/or set an alarm based off the time given.
 
 #### Dependencies
-Plant search data are available and accessible.  
+_Plant search data are available and accessible.  
 The device has a camera, and the user has granted access to the camera.  
-The device has GPS capabilities, and the user has granted location access.  
+The device has GPS capabilities, and the user has granted location access.  _
 
 #### Assumptions  
-Scientific names are stated in Latin.  
-Common names are stated in English.  
+_Scientific names are stated in Latin.  
+Common names are stated in English. _ 
 
 #### Examples  
 
-1.1  
-**Given** a feed of plant data is available  
-**Given** GPS details are available  
-**When**  
+1.1
+**Given** a feed of location data is available
+**When** I search for “New York”
+**Then** I should receive at least one result with these attributes:
+        Sunrise: X:XX A.M.
+        Sunset: X:XX P.M.
+        Weather: Clear/Cloud/Rain/Stormy/etc.
 
--	Select the plant Asimina triloba  
--	Add notes: “planted by Brandan Jones”  
-**Then**  when I navigate to the Specimen History view, I should see at least one Asimina triloba specimen with the notes, “planted by Brandan Jones”  
+1.2
+**Given** a feed of location data is available
+**When** I search for “Cincinnati”
+**Then** I should receive at least one result with these attributes:
+        Sunrise: X:XX A.M.
+        Sunset: X:XX P.M.
+        Weather: Clear/Cloud/Rain/Stormy/etc.
 
-2.1  
-**Given** a feed of plant data is available  
-**Given** GPS details are available  
-**When**   
+1.3
+**Given** a feed of location data is available
+**When** I search for “sudnfsgsdfg”
+**Then** I should receive zero results
 
--	Select the plant Malus domestica ‘Fuji’  
--	Take a photo of a Fuji apple seedling  
-**Then** when I navigate to the Specimen History view, I should see at least one Malus domestica ‘Fuji’ specimen with the a photo of a Fuji apple seedling.  
+
+## Class Diagram
+
+![ClassDiagram](LinkToClassDiagramImage)
+
+### Class Diagram Description
+
+
+**MainActivity:**  The first screen the user sees.  This will have a list of specimens, and an option to enter a new specimen.  
+
+**SpecimenDetailsActivity:**  A screen that shows details of a specimen.  
+
+**RetrofitInstance:** Boostrap class required for Retrofit.  
+
+**Plant:** Noun class that represents a plant.  
+
+**Specimen:** Noun class that represents a specimen.  
+
+**IPlantDAO:** Interface for Retrofit to find and parse Plant JSON.  
+
+**ISpecimenDAO:** Interface for Room to persist Specimen data  
+
+---
+
+#STARTED BELOW
+
+## Scrum Roles
+
+- DevOps/Product Owner/Scrum Master: Summer Gasaway  
+- Frontend Developer:  
+- Integration Developer:  
+
+## Weekly Meeting
+
+Sunday at 10 AM on Teams.
