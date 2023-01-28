@@ -79,7 +79,7 @@ Common: White Oak
 1.3  
 **Given** a feed of plant data is available  
 **When** I search for “sklujapouetllkjsda;u”  
-**Then** I should receive zero results (an empty list) _ 
+**Then** I should receive zero results (an empty list) 
 
 
 ### Requirement 101: Search Locations and Receive Data
@@ -89,13 +89,13 @@ Common: White Oak
 As a user interested in when the sun will rise and/or set, I want to be able to search for a location so that I can figure out when the sun will rise/set for that location and/or set an alarm based off the time given.
 
 #### Dependencies
-_Plant search data are available and accessible.  
+Plant search data are available and accessible.  
 The device has a camera, and the user has granted access to the camera.  
-The device has GPS capabilities, and the user has granted location access.  _
+The device has GPS capabilities, and the user has granted location access.
 
 #### Assumptions  
-_Scientific names are stated in Latin.  
-Common names are stated in English. _ 
+Scientific names are stated in Latin.  
+Common names are stated in English. 
 
 #### Examples  
 
