@@ -1,7 +1,7 @@
 # SunDial
 ---
 
-Design Document
+#### Design Document
 
 - Jared Belmont
 
@@ -45,49 +45,55 @@ As a user wanting to find the sun rise and set, I want to be able to see the tim
 
 #### Dependencies
 
- 
+The device must have gps capabilities or must be connected to the internet.
 
 #### Assumptions
 
-
+The user is in a location supported by the api.
 
 #### Examples
 
 1.1  
 
 
-**Given**  
+**Given**  The user's location is in Cincinnati, Ohio.
 
 
-**When**   
+**When**   The user open's the app.
 
 
-**Then**  
+**Then**  I should receive at least on result with at least one of these attributes:
 
+        Sunrise: X:XX A.M.
+        Sunset: X:XX P.M.
+        Weather: Clear/Cloud/Rain/Stormy/etc.
 
 
 1.2  
 
-**Given**  
+**Given**  The user's location is in Quebec, Canada.
 
 
-**When**   
+**When**   The user open's the app.
 
 
-**Then**  
+**Then**  I should receive at least on result with at least one of these attributes:
+
+        Sunrise: X:XX A.M.
+        Sunset: X:XX P.M.
+        Weather: Clear/Cloud/Rain/Stormy/etc.
 
 
   
-
 1.3  
 
-**Given**  
+**Given**  The user's location is in Zucchelli Station, Antartica.
 
 
-**When** 
+**When** The user open's the app.
 
 
-**Then**  
+**Then**  I should receive no results due to Antartica not being supported by the API.
 
 
 
@@ -149,7 +155,6 @@ User inputs a location in either English or in Latitude or Longitudinal values.
 **Then** I should receive zero results
 
 
-
 ### Requirement 102: Save Other Locations
 
 #### Scenario
@@ -159,96 +164,96 @@ As a user wanting to be able to save other locations to view later.
 
 #### Dependencies
 
- 
+ The user must be signed into an account.
 
 #### Assumptions
 
-
+The user is sucessfully able to create an account.
 
 #### Examples
 
 1.1  
 
 
-**Given**  
+**Given**  The user is logged into an account.
 
-**When**   
+**When**   The user taps on saved locations.
 
-**Then**  
+**Then**  The user should see their saved locations.
 
 
 
 1.2  
 
 
-**Given**  
+**Given**  The user is logged into an account.
 
-**When**   
+**When**   The user adds a location to their saved locations list.
 
-**Then**  
+**Then**  The location should now appear under the user's saved location lists.
 
   
 
 1.3  
 
 
-**Given**  
+**Given**  The user is not logged into an account.
 
-**When** 
+**When** The user taps on saved locations.
 
-**Then**  
+**Then**  No saved locations should be displayed.
 
 
 ### Requirement 103: Access the Weather Information Based on Given Location
 
 #### Scenario
 
-
+As a user wanting to know what the weather currently is I want to be able to view the weather for the location that I search.
 
 
 #### Dependencies
 
- 
+ The device has GPS cabailities or is connected to the internet.
 
 #### Assumptions
 
-
+The location is supported by the API.
 
 #### Examples
 
 1.1  
 
 
-**Given**  
+**Given**  The location is Cincinnati, OH.
 
 
-**When**   
+**When**   I tap on the weather.
 
 
-**Then**  
+**Then**  I should receieve the weather results for Cincinnati, OH.
 
 
 
 1.2  
 
-**Given**  
+**Given**  The location is London, UK.
 
 
-**When**   
+**When**   I tap on the weather.
 
 
-**Then**  
+**Then**  I should receive the weather results for London, UK.
 
   
 
 1.3  
 
 
-**Given**  
+**Given**  The location is Cairo, Egypt.
 
-**When** 
+**When** I tap on the weather.
 
-**Then**  
+**Then**  I should receive no weather results.
 
 
 
