@@ -248,15 +248,26 @@ As a user wanting to be able to save other locations to view later.
 
 ## Class Diagram
 
-![ClassDiagram](LinkToClassDiagramImage)
+![SunDial drawio](https://user-images.githubusercontent.com/89750463/215298779-3d8bf123-8051-4b00-9923-9c18b1d7dfa3.png)
 
 ### Class Diagram Description
-  
+
+**MainActivity:**  The first screen the user sees. This will have the information for the date and an option to add a new alarm.
+
+**RetrofitInstance:**  Bootstrap class required for Retrofit. 
+
+**Date:**  Noun class that represents a day.
+
+**Alarm:**  Noun class that represents an alarm.
+
+**IDateDAO:**  Interface for Retrofit to find and parse Date JSON.
+
+**IAlarmDAO:**  Interface for Room to persist Alarm data.
 
 ## Scrum Roles
 
 - DevOps/Product Owner/Scrum Master: Summer Gasaway  
-- Frontend Developer:  
+- Frontend Developer:  Jared Belmont
 - Integration Developer:  
 
 ## Weekly Meeting
