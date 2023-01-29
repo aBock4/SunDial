@@ -5,7 +5,7 @@
 
 - Jared Belmont
 
-- Adam Bockhurst
+- Adam Bockhorst
 
 - Summer Gasaway
 
