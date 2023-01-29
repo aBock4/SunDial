@@ -66,7 +66,7 @@ The user is in a location supported by the api.
 
         Sunrise: X:XX A.M.
         Sunset: X:XX P.M.
-        Weather: Clear/Cloud/Rain/Stormy/etc.
+        Weather: Clear/Cloudy/Rainy/Stormy/etc.
 
 1.2  
 
@@ -80,7 +80,7 @@ The user is in a location supported by the api.
 
         Sunrise: X:XX A.M.
         Sunset: X:XX P.M.
-        Weather: Clear/Cloud/Rain/Stormy/etc.
+        Weather: Clear/Cloudy/Rainy/Stormy/etc.
 
 
   
@@ -229,7 +229,7 @@ The location is supported by the API.
 
 **Then**  I should receieve the weather results for Cincinnati, OH.
 
-        Weather: Clear/Cloud/Rain/Stormy/etc.
+        Weather: Clear/Cloudy/Rainy/Stormy/etc.
 
 
 1.2  
@@ -242,7 +242,7 @@ The location is supported by the API.
 
 **Then**  I should receive the weather results for London, UK.
 
-        Weather: Clear/Cloud/Rain/Stormy/etc.
+        Weather: Clear/Cloudy/Rainy/Stormy/etc.
 
 
 1.3  
