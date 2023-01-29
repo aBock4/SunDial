@@ -99,13 +99,16 @@ As a user interested in when the sun will rise and/or set, I want to be able to 
 
 #### Dependencies
 
-
+The device has GPS capabilities.
+The device has the ability to receive notificaitons.
+Solar data is available and accessible.
 
 #### Assumptions  
 
-
+User inputs a location in either English or in Latitude or Longitudinal values.
 
 #### Examples  
+
 
 1.1.  
 
@@ -120,6 +123,7 @@ As a user interested in when the sun will rise and/or set, I want to be able to 
         Sunset: X:XX P.M.
         Weather: Clear/Cloud/Rain/Stormy/etc.
 
+
 1.2
 
 
@@ -132,6 +136,7 @@ As a user interested in when the sun will rise and/or set, I want to be able to 
         Sunrise: X:XX A.M.
         Sunset: X:XX P.M.
         Weather: Clear/Cloud/Rain/Stormy/etc.
+
 
 1.3
 
@@ -193,7 +198,7 @@ As a user wanting to be able to save other locations to view later.
 **Then**  
 
 
-### Requirement 103: Some Other Requirement
+### Requirement 103: Access the Weather Information Based on Given Location
 
 #### Scenario
 
@@ -268,7 +273,7 @@ As a user wanting to be able to save other locations to view later.
 
 - DevOps/Product Owner/Scrum Master: Summer Gasaway  
 - Frontend Developer:  Jared Belmont/Adam Bockhorst
-- Integration Developer:  
+- Integration Developer:  Jackson Pinchot/Eddie Greenlee
 
 ## Weekly Meeting
 
