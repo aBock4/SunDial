@@ -68,7 +68,6 @@ The user is in a location supported by the api.
         Sunset: X:XX P.M.
         Weather: Clear/Cloud/Rain/Stormy/etc.
 
-
 1.2  
 
 **Given**  The user's location is in Quebec, Canada.
@@ -128,7 +127,6 @@ User inputs a location in either English or in Latitude or Longitudinal values.
 
         Sunrise: X:XX A.M.
         Sunset: X:XX P.M.
-        Weather: Clear/Cloud/Rain/Stormy/etc.
 
 
 1.2
@@ -142,7 +140,6 @@ User inputs a location in either English or in Latitude or Longitudinal values.
 
         Sunrise: X:XX A.M.
         Sunset: X:XX P.M.
-        Weather: Clear/Cloud/Rain/Stormy/etc.
 
 
 1.3
@@ -232,6 +229,7 @@ The location is supported by the API.
 
 **Then**  I should receieve the weather results for Cincinnati, OH.
 
+        Weather: Clear/Cloud/Rain/Stormy/etc.
 
 
 1.2  
@@ -244,7 +242,8 @@ The location is supported by the API.
 
 **Then**  I should receive the weather results for London, UK.
 
-  
+        Weather: Clear/Cloud/Rain/Stormy/etc.
+
 
 1.3  
 
