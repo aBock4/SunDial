@@ -29,7 +29,8 @@ From photographers to astronomers, this app is perfect for everyone.
 
 ## Storyboard
 
-![SunDialScreens](https://user-images.githubusercontent.com/82166772/215300156-32c92bd2-bd50-49f5-8ea8-2747ddb2e1c9.png)
+![SunDialScreens](https://user-images.githubusercontent.com/82166772/215336426-9579b8d5-9ae9-4757-9fde-2cc0b16fcebc.png)
+
 
 ## Functional Requirements
 
