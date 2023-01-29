@@ -267,7 +267,7 @@ As a user wanting to be able to save other locations to view later.
 ## Scrum Roles
 
 - DevOps/Product Owner/Scrum Master: Summer Gasaway  
-- Frontend Developer:  Jared Belmont
+- Frontend Developer:  Jared Belmont/Adam Bockhorst
 - Integration Developer:  
 
 ## Weekly Meeting
