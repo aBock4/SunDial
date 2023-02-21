@@ -8,10 +8,10 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import retrofit2.awaitResponse
 
-interface ITwighlightService{
+interface ITwilightService{
     suspend fun fetchData() : List<Twilight>?
 }
-class TwilightService : ITwighlightService{
+class TwilightService : ITwilightService{
     override suspend fun fetchData() : List<Twilight>?{
         return withContext(Dispatchers.IO){
             val service = RetrofitClientInstance.retrofitInstance?.create(ITwilightDAO::class.java)
