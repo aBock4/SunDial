@@ -1,14 +1,16 @@
 package com.sundial.v1001
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.sundial.v1001.ui.theme.SunDialTheme
 
@@ -19,7 +21,7 @@ class MainActivity : ComponentActivity() {
             SunDialTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-                    Greeting("Android")
+                    TwilightFacts("Android")
                 }
             }
         }
@@ -27,14 +29,35 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
+fun TwilightFacts(name: String) {
+    var sunrise by remember { mutableStateOf("")}
+    var sunset by remember { mutableStateOf("")}
+    val context = LocalContext.current
+    Column {
+        OutlinedTextField(
+            value = sunrise,
+            onValueChange = { sunrise = it },
+            label = { Text(stringResource(R.string.sunrise)) }
+        )
+        OutlinedTextField(
+            value = sunset,
+            onValueChange = { sunset = it },
+            label = { Text(stringResource(R.string.sunset)) }
+        )
+        Button(
+            onClick = {
+                Toast.makeText(context, "$sunrise $sunset", Toast.LENGTH_LONG).show()
+            }
+        ){
+            Text(text = "save")
+        }
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     SunDialTheme {
-        Greeting("Android")
+        TwilightFacts("Android")
     }
 }
