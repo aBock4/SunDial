@@ -1,5 +1,6 @@
 package com.sundial.v1001
 
+import android.app.Activity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -13,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.sundial.v1001.dto.Twilight
 import com.sundial.v1001.ui.theme.SunDialTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -24,7 +26,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             viewModel.fetchData()
-            val twilight by viewModel.twilight.observeAsState(initial = emptyList())
+            val twilight by viewModel.twilight.observeAsState(initial = emptyList<Twilight>())
             SunDialTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
