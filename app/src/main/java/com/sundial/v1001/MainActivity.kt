@@ -5,15 +5,16 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.sundial.v1001.dto.Twilight
 import com.sundial.v1001.ui.theme.SunDialTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -37,28 +38,53 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
 @Composable
 fun TwilightFacts(name: String) {
     var sunrise by remember { mutableStateOf("")}
     var sunset by remember { mutableStateOf("")}
     val context = LocalContext.current
-    Column {
-        OutlinedTextField(
-            value = sunrise,
-            onValueChange = { sunrise = it },
-            label = { Text(stringResource(R.string.sunrise)) }
-        )
-        OutlinedTextField(
-            value = sunset,
-            onValueChange = { sunset = it },
-            label = { Text(stringResource(R.string.sunset)) }
-        )
-        Button(
-            onClick = {
-                Toast.makeText(context, "$sunrise $sunset", Toast.LENGTH_LONG).show()
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            OutlinedTextField(
+                value = sunrise,
+                onValueChange = { sunrise = it },
+                label = { Text(stringResource(R.string.sunrise)) }
+            )
+            OutlinedTextField(
+                value = sunset,
+                onValueChange = { sunset = it },
+                label = { Text(stringResource(R.string.sunset)) }
+            )
+            Button(
+                onClick = {
+                    Toast.makeText(context, "$sunrise $sunset", Toast.LENGTH_LONG).show()
+                }
+            ){
+                Text(text = "save")
             }
-        ){
-            Text(text = "save")
+        }
+    }
+}
+
+
+@Composable
+fun LogInButton() {
+    Box(modifier = Modifier
+        .fillMaxSize()
+    ) {
+        Button(onClick = { /*TODO*/ },
+        modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .padding(16.dp)
+        ) {
+            Text(text = "Log in")
         }
     }
 }
@@ -68,5 +94,6 @@ fun TwilightFacts(name: String) {
 fun DefaultPreview() {
     SunDialTheme {
         TwilightFacts("Android")
+        LogInButton()
     }
 }
