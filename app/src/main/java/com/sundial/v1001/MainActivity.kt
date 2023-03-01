@@ -1,6 +1,7 @@
 package com.sundial.v1001
 
 import android.app.Activity
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -73,6 +74,28 @@ fun TwilightFacts(name: String) {
     }
 }
 
+@Composable
+fun SearchBar() {
+    var text by remember { mutableStateOf("") }
+    Surface(
+        elevation = 4.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            OutlinedTextField(
+                value = text,
+                onValueChange = { text = it },
+                label = { Text(text = "Search Location") },
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+        }
+    }
+}
+
 
 @Composable
 fun LogInButton() {
@@ -95,5 +118,6 @@ fun DefaultPreview() {
     SunDialTheme {
         TwilightFacts("Android")
         LogInButton()
+        SearchBar()
     }
 }
