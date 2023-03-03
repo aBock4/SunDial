@@ -8,12 +8,12 @@ import com.sundial.v1001.service.ITwilightService
 import com.sundial.v1001.service.TwilightService
 import kotlinx.coroutines.launch
 
-class MainViewModel (var twilightService : ITwilightService = TwilightService()) : ViewModel() {
+class MainViewModel (private var twilightService : ITwilightService = TwilightService()) : ViewModel() {
     var twilight : MutableLiveData<List<Twilight>> = MutableLiveData<List<Twilight>>()
 
-    fun fetchData(){
+    fun fetchTwilight(){
         viewModelScope.launch{
-            var innerTwilight = twilightService.fetchData()
+            val innerTwilight = twilightService.fetchTwilight()
             twilight.postValue(innerTwilight)
         }
     }
