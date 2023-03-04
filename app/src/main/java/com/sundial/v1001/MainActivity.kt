@@ -12,7 +12,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.sundial.v1001.ui.theme.SunDialTheme
 
+/**
+ * This class represents the main activity for the SunDial app and sets up the UI layout and theme.
+ */
 class MainActivity : ComponentActivity() {
+    /**
+     * Creates the layout of the app.
+     * @author Summer Gasaway
+     * */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -26,11 +33,19 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * Creates a simple message to greet the user.
+ * @author Summer Gasaway
+ */
 @Composable
 fun Greeting(name: String) {
     Text(text = "Hello $name!")
 }
 
+/**
+ * Displays a preview for our layout in the IDE without AVD.
+ * @author Summer Gasaway
+ */
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {

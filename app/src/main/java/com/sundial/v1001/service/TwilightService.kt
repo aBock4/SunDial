@@ -9,14 +9,14 @@ import kotlinx.coroutines.withContext
 import retrofit2.awaitResponse
 
 interface ITwilightService{
-    suspend fun fetchData() : List<Twilight>?
+    suspend fun fetchTwilights() : List<Twilight>?
 }
 class TwilightService : ITwilightService{
-    override suspend fun fetchData() : List<Twilight>?{
+    override suspend fun fetchTwilights() : List<Twilight>?{
         return withContext(Dispatchers.IO){
             val service = RetrofitClientInstance.retrofitInstance?.create(ITwilightDAO::class.java)
-            val data = async {service?.getData()}
-            var result = data.await()?.awaitResponse()?.body()
+            val Twilight = async { service?.getAllTwilights() }
+            var result = Twilight.await()?.awaitResponse()?.body()
             return@withContext result
         }
     }

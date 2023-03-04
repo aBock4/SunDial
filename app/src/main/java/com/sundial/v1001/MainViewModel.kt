@@ -11,9 +11,9 @@ import kotlinx.coroutines.launch
 class MainViewModel (var twilightService : ITwilightService = TwilightService()) : ViewModel() {
     var twilight : MutableLiveData<List<Twilight>> = MutableLiveData<List<Twilight>>()
 
-    fun fetchData(){
+    fun fetchTwilights(){
         viewModelScope.launch{
-            var innerTwilight = twilightService.fetchData()
+            var innerTwilight = twilightService.fetchTwilights()
             twilight.postValue(innerTwilight)
         }
     }
