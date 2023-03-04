@@ -27,7 +27,6 @@ class TwilightTests {
     }
     private suspend fun whenTwilightDataIsReadAndParsed() {
         allTwilights = twilightService.fetchTwilights()
-        println("\n[activity = $allTwilights]\n")
     }
     private fun thenTheTwilightDataShouldNotBeNull() {
         Assert.assertNotNull(allTwilights)
