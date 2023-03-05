@@ -1,6 +1,7 @@
 package com.sundial.v1001
 
 import android.app.Application
+import org.koin.android.BuildConfig
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.GlobalContext

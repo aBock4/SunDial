@@ -13,11 +13,11 @@ interface ITwilightService{
 }
 class TwilightService : ITwilightService{
     override suspend fun fetchTwilight() : List<Twilight>?{
-        return withContext(Dispatchers.IO){
+        return withContext(Dispatchers.IO) {
             val service = RetrofitClientInstance.retrofitInstance?.create(ITwilightDAO::class.java)
-            val data = async {service?.getAllTwilights()}
-            var result = data.await()?.awaitResponse()?.body()
-            return@withContext result
+            val data = async { service?.getAllTwilights() }
+
+            return@withContext data.await()?.awaitResponse<List<Twilight>>()?.body()
         }
     }
 
