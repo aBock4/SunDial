@@ -19,7 +19,7 @@ class MainActivity : ComponentActivity() {
             SunDialTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
-                    Greeting("Android")
+                    LogActivity("Android")
                 }
             }
         }
@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String) {
+fun LogActivity(name: String) {
     Text(text = "Hello $name!")
 }
 
@@ -35,6 +35,6 @@ fun Greeting(name: String) {
 @Composable
 fun DefaultPreview() {
     SunDialTheme {
-        Greeting("Android")
+        LogActivity("Android")
     }
 }
