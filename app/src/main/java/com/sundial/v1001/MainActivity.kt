@@ -119,7 +119,7 @@ fun LogInButton() {
     Box(modifier = Modifier
         .fillMaxSize()
     ) {
-        Button(onClick = { /*TODO*/ },
+        Button(onClick = { signIn() },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
@@ -127,14 +127,39 @@ fun LogInButton() {
             Text(text = "Log in", fontFamily = lexendFontFamily, fontWeight = FontWeight.Medium)
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    SunDialTheme {
-        TwilightFacts("Android")
-        LogInButton()
-        SearchBar()
+    @Preview(showBackground = true)
+    @Composable
+    fun DefaultPreview() {
+        SunDialTheme {
+            TwilightFacts()
+            LogInButton()
+            SearchBar()
+        }
     }
+
+    private fun signIn() {
+        val providers = arrayListOf(
+            AuthUI.IdpConfig.EmailBuilder().build(),
+        )
+        val signinIntent = AuthUI.getInstance()
+            .createSignInIntentBuilder()
+            .setAvailableProviders(providers)
+            .build()
+
+        signInLauncher.launch(signinIntent)
+    }
+
+    private val signInLauncher = registerForActivityResult(
+    FirebaseAuthUIActivityResultContract()
+    ) {
+    res -> this.signInResult(res)
+    }
+//sign in
+    private fun signInResult(result: FirebaseAuthUIAuthenticationResult) {
+        val response = result.idpResponse
+        if (result.resultCode == ComponentActivity.RESULT_OK) {
+            user = FirebaseAuth.getInstance().currentUser
+        } else {
+            Log.e("MainActivity.kt", "Error logging in " + response?.error?.errorCode)
+        }
 }
