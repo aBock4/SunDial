@@ -2,6 +2,7 @@ package com.sundial.v1001
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,6 +21,11 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.firebase.ui.auth.AuthUI
+import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
+import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.sundial.v1001.dto.Twilight
 import com.sundial.v1001.ui.theme.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -27,6 +33,8 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModel<MainViewModel>()
+
+    private var user: FirebaseUser? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +47,8 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     TwilightFacts("Android")
+                    //SearchBar()
+                    LogInButton()
                 }
             }
         }
@@ -146,7 +156,7 @@ class MainActivity : ComponentActivity() {
                 .fillMaxSize()
         ) {
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { signIn() },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp)
@@ -163,6 +173,33 @@ class MainActivity : ComponentActivity() {
             TwilightFacts("Android")
             LogInButton()
             SearchBar()
+        }
+    }
+    
+    private fun signIn(){
+        val providers = arrayListOf(
+            AuthUI.IdpConfig.EmailBuilder().build(),
+            AuthUI.IdpConfig.GoogleBuilder().build()
+        )
+        val signinIntent = AuthUI.getInstance()
+            .createSignInIntentBuilder()
+            .setAvailableProviders(providers)
+            .build()
+
+        signInLauncher.launch(signinIntent)
+    }
+
+    private val signInLauncher = registerForActivityResult(
+        FirebaseAuthUIActivityResultContract()
+    ) {
+            res -> this.signInResult(res)
+    }
+    private fun signInResult(result: FirebaseAuthUIAuthenticationResult){
+        val response = result.idpResponse
+        if (result.resultCode == RESULT_OK){
+            user = FirebaseAuth.getInstance().currentUser
+        } else {
+            Log.e("MainActivity.kt", "Error logging in " + response?.error?.errorCode)
         }
     }
 }
