@@ -33,7 +33,9 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModel<MainViewModel>()
+
     private var user: FirebaseUser? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -173,6 +175,7 @@ class MainActivity : ComponentActivity() {
             SearchBar()
         }
     }
+    
     private fun signIn(){
         val providers = arrayListOf(
             AuthUI.IdpConfig.EmailBuilder().build(),
