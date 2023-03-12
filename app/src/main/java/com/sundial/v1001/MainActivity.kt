@@ -2,6 +2,7 @@ package com.sundial.v1001
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -20,121 +21,182 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.firebase.ui.auth.AuthUI
+import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
+import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.sundial.v1001.dto.Twilight
 import com.sundial.v1001.ui.theme.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel : MainViewModel by viewModel<MainViewModel>()
-
+    private val viewModel: MainViewModel by viewModel<MainViewModel>()
+    private var user: FirebaseUser? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             SunDialTheme {
                 // A surface container using the 'background' color from the theme
-                Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colors.background){
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colors.background
+                ) {
                     TwilightFacts("Android")
+                    //SearchBar()
+                    LogInButton()
                 }
             }
         }
     }
-}
 
 
-@Composable
-fun TwilightFacts(name: String) {
-    var sunrise by remember { mutableStateOf("")}
-    var sunset by remember { mutableStateOf("")}
-    val lexendFontFamily = FontFamily(
-        Font(R.font.lexendregular, FontWeight.Normal),
-        Font(R.font.lexendbold, FontWeight.Bold),
-        Font(R.font.lexendblack, FontWeight.Black),
-        Font(R.font.lexendlight, FontWeight.Light),
-        Font(R.font.lexendmedium, FontWeight.Medium)
-    )
-    val context = LocalContext.current
-    Box(
-        modifier = Modifier.fillMaxSize()
-            .background(color = Champagne),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+    @Composable
+    fun TwilightFacts(name: String) {
+        var sunrise by remember { mutableStateOf("") }
+        var sunset by remember { mutableStateOf("") }
+        val lexendFontFamily = FontFamily(
+            Font(R.font.lexendregular, FontWeight.Normal),
+            Font(R.font.lexendbold, FontWeight.Bold),
+            Font(R.font.lexendblack, FontWeight.Black),
+            Font(R.font.lexendlight, FontWeight.Light),
+            Font(R.font.lexendmedium, FontWeight.Medium)
+        )
+        val context = LocalContext.current
+        Box(
+            modifier = Modifier.fillMaxSize()
+                .background(color = Champagne),
+            contentAlignment = Alignment.Center
         ) {
-            OutlinedTextField(
-                value = sunrise,
-                onValueChange = { sunrise = it },
-                label = { Text(stringResource(R.string.sunrise), fontFamily = lexendFontFamily, fontWeight = FontWeight.Bold)}
-            )
-            OutlinedTextField(
-                value = sunset,
-                onValueChange = { sunset = it },
-                label = { Text(stringResource(R.string.sunset), fontFamily = lexendFontFamily, fontWeight = FontWeight.Bold)},
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                OutlinedTextField(
+                    value = sunrise,
+                    onValueChange = { sunrise = it },
+                    label = {
+                        Text(
+                            stringResource(R.string.sunrise),
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                )
+                OutlinedTextField(
+                    value = sunset,
+                    onValueChange = { sunset = it },
+                    label = {
+                        Text(
+                            stringResource(R.string.sunset),
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+
+                    )
+                Button(
+                    onClick = {
+                        Toast.makeText(context, "$sunrise $sunset", Toast.LENGTH_LONG).show()
+                    }
+                ) {
+                    Text(
+                        text = "Save",
+                        color = Color.White,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun SearchBar() {
+        var text by remember { mutableStateOf("") }
+        val lexendFontFamily = FontFamily(Font(R.font.lexendbold, FontWeight.Bold))
+        Surface(
+            elevation = 4.dp
+        ) {
+            Row(
+                modifier = Modifier
+                    .background(color = Orange)
+                    .fillMaxWidth()
+                    .padding(16.dp)
+
+            ) {
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    label = {
+                        Text(
+                            text = "Search Location",
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
 
                 )
-            Button(
-                onClick = {
-                    Toast.makeText(context, "$sunrise $sunset", Toast.LENGTH_LONG).show()
-                }
-            ){
-                Text(text = "Save", color = Color.White, fontFamily = lexendFontFamily, fontWeight = FontWeight.Medium)
             }
         }
     }
-}
 
-@Composable
-fun SearchBar() {
-    var text by remember { mutableStateOf("") }
-    val lexendFontFamily = FontFamily(Font(R.font.lexendbold, FontWeight.Bold))
-    Surface(
-        elevation = 4.dp
-    ) {
-        Row(
+
+    @Composable
+    fun LogInButton() {
+        val lexendFontFamily = FontFamily(Font(R.font.lexendmedium, FontWeight.Medium))
+        Box(
             modifier = Modifier
-                .background(color = Orange)
-                .fillMaxWidth()
-                .padding(16.dp)
-
+                .fillMaxSize()
         ) {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                label = { Text(text = "Search Location", fontFamily = lexendFontFamily, fontWeight = FontWeight.Bold) },
+            Button(
+                onClick = { signIn() },
                 modifier = Modifier
-                    .fillMaxWidth()
-
-            )
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp)
+            ) {
+                Text(text = "Log in", fontFamily = lexendFontFamily, fontWeight = FontWeight.Medium)
+            }
         }
     }
-}
 
+    @Preview(showBackground = true)
+    @Composable
+    fun DefaultPreview() {
+        SunDialTheme {
+            TwilightFacts("Android")
+            LogInButton()
+            SearchBar()
+        }
+    }
+    private fun signIn(){
+        val providers = arrayListOf(
+            AuthUI.IdpConfig.EmailBuilder().build(),
+            AuthUI.IdpConfig.GoogleBuilder().build()
+        )
+        val signinIntent = AuthUI.getInstance()
+            .createSignInIntentBuilder()
+            .setAvailableProviders(providers)
+            .build()
 
-@Composable
-fun LogInButton() {
-    val lexendFontFamily = FontFamily(Font(R.font.lexendmedium, FontWeight.Medium))
-    Box(modifier = Modifier
-        .fillMaxSize()
+        signInLauncher.launch(signinIntent)
+    }
+
+    private val signInLauncher = registerForActivityResult(
+        FirebaseAuthUIActivityResultContract()
     ) {
-        Button(onClick = { /*TODO*/ },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            Text(text = "Log in", fontFamily = lexendFontFamily, fontWeight = FontWeight.Medium)
-        }
+            res -> this.signInResult(res)
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    SunDialTheme {
-        TwilightFacts("Android")
-        LogInButton()
-        SearchBar()
+    private fun signInResult(result: FirebaseAuthUIAuthenticationResult){
+        val response = result.idpResponse
+        if (result.resultCode == RESULT_OK){
+            user = FirebaseAuth.getInstance().currentUser
+        } else {
+            Log.e("MainActivity.kt", "Error logging in " + response?.error?.errorCode)
+        }
     }
 }
