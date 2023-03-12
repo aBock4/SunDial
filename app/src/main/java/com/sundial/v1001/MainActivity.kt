@@ -156,7 +156,7 @@ class MainActivity : ComponentActivity() {
     ) {
     res -> this.signInResult(res)
     }
-
+//sign in
     private fun signInResult(result: FirebaseAuthUIAuthenticationResult) {
         val response = result.idpResponse
         if (result.resultCode == ComponentActivity.RESULT_OK) {
