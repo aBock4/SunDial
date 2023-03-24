@@ -56,6 +56,11 @@ class MainActivity : ComponentActivity() {
 
 
     @Composable
+    fun CurrentLocation(name: String) {
+
+    }
+
+    @Composable
     fun TwilightFacts(name: String) {
         var sunrise by remember { mutableStateOf("") }
         var sunset by remember { mutableStateOf("") }
