@@ -33,6 +33,7 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModel<MainViewModel>()
+    private val applicationViewModel : ApplicationViewModel by viewModel<ApplicationViewModel>()
 
     private var user: FirebaseUser? = null
 
@@ -54,11 +55,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
-    @Composable
-    fun CurrentLocation(name: String) {
-
-    }
 
     @Composable
     fun TwilightFacts(name: String) {
