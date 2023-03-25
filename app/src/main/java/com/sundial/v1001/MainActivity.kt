@@ -1,11 +1,13 @@
 package com.sundial.v1001
 
-import android.app.Activity
+import android.Manifest
+import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -21,12 +23,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.sundial.v1001.dto.Twilight
+import com.sundial.v1001.dto.LocationDetails
 import com.sundial.v1001.ui.theme.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -41,23 +44,46 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val location by applicationViewModel.getLocationLiveData().observeAsState()
             SunDialTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    TwilightFacts("Android")
+                    TwilightFacts("Android", location)
                     //SearchBar()
                     LogInButton()
                 }
             }
+            prepLocationUpdates()
         }
+    }
+
+    private fun prepLocationUpdates() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_GRANTED) {
+            requestLocationUpdates()
+        } else {
+            requestSinglePermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
+
+    private val requestSinglePermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){
+        isGranted ->
+        if (isGranted){
+            requestLocationUpdates()
+        } else{
+            Toast.makeText(this, "GPS Unavailable", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun requestLocationUpdates() {
+        applicationViewModel.startLocationUpdates()
     }
 
 
     @Composable
-    fun TwilightFacts(name: String) {
+    fun TwilightFacts(name: String, location: LocationDetails?) {
         var sunrise by remember { mutableStateOf("") }
         var sunset by remember { mutableStateOf("") }
         val lexendFontFamily = FontFamily(
@@ -69,7 +95,8 @@ class MainActivity : ComponentActivity() {
         )
         val context = LocalContext.current
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
                 .background(color = Champagne),
             contentAlignment = Alignment.Center
         ) {
@@ -77,6 +104,7 @@ class MainActivity : ComponentActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                GPS(location)
                 OutlinedTextField(
                     value = sunrise,
                     onValueChange = { sunrise = it },
@@ -113,6 +141,14 @@ class MainActivity : ComponentActivity() {
                     )
                 }
             }
+        }
+    }
+
+    private @Composable
+    fun GPS(location: LocationDetails?) {
+        location?.let {
+            Text(text = location.latitude)
+            Text(text = location.longitude)
         }
     }
 
@@ -171,7 +207,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun DefaultPreview() {
         SunDialTheme {
-            TwilightFacts("Android")
+            TwilightFacts("Android", location)
             LogInButton()
             SearchBar()
         }
