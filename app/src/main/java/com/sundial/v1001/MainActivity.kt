@@ -206,6 +206,7 @@ class MainActivity : ComponentActivity() {
     @Preview(showBackground = true)
     @Composable
     fun DefaultPreview() {
+        val location by applicationViewModel.getLocationLiveData().observeAsState()
         SunDialTheme {
             TwilightFacts("Android", location)
             LogInButton()
