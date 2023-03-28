@@ -2,6 +2,7 @@ package com.sundial.v1001
 
 import android.Manifest
 import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -37,9 +38,9 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModel<MainViewModel>()
     private val applicationViewModel : ApplicationViewModel by viewModel<ApplicationViewModel>()
+    private val lexendFontFamily = FontFamily(Font(R.font.lexendbold, FontWeight.Bold))
 
     private var user: FirebaseUser? = null
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +54,6 @@ class MainActivity : ComponentActivity() {
                 ) {
                     TwilightFacts("Android", location)
                     //SearchBar()
-                    LogInButton()
                 }
             }
             prepLocationUpdates()
@@ -73,7 +73,7 @@ class MainActivity : ComponentActivity() {
         if (isGranted){
             requestLocationUpdates()
         } else{
-            Toast.makeText(this, "GPS Unavailable", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.gpsUnavailable), Toast.LENGTH_LONG).show()
         }
     }
 
@@ -86,13 +86,6 @@ class MainActivity : ComponentActivity() {
     fun TwilightFacts(name: String, location: LocationDetails?) {
         var sunrise by remember { mutableStateOf("") }
         var sunset by remember { mutableStateOf("") }
-        val lexendFontFamily = FontFamily(
-            Font(R.font.lexendregular, FontWeight.Normal),
-            Font(R.font.lexendbold, FontWeight.Bold),
-            Font(R.font.lexendblack, FontWeight.Black),
-            Font(R.font.lexendlight, FontWeight.Light),
-            Font(R.font.lexendmedium, FontWeight.Medium)
-        )
         val context = LocalContext.current
         Box(
             modifier = Modifier
@@ -108,33 +101,36 @@ class MainActivity : ComponentActivity() {
                 OutlinedTextField(
                     value = sunrise,
                     onValueChange = { sunrise = it },
+                    readOnly = true,
                     label = {
                         Text(
                             stringResource(R.string.sunrise),
-                            fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Bold
+                            fontFamily = lexendFontFamily
                         )
                     }
                 )
                 OutlinedTextField(
                     value = sunset,
                     onValueChange = { sunset = it },
+                    readOnly = true,
                     label = {
                         Text(
                             stringResource(R.string.sunset),
-                            fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Bold
+                            fontFamily = lexendFontFamily
                         )
                     },
 
                     )
                 Button(
                     onClick = {
-                        Toast.makeText(context, "$sunrise $sunset", Toast.LENGTH_LONG).show()
+                        if (user == null) { signIn() }
+                        else {
+                            Toast.makeText(context, "$sunrise $sunset", Toast.LENGTH_LONG).show()
+                        }
                     }
                 ) {
                     Text(
-                        text = "Save",
+                        text = stringResource(R.string.save),
                         color = Color.White,
                         fontFamily = lexendFontFamily,
                         fontWeight = FontWeight.Medium
@@ -155,7 +151,6 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun SearchBar() {
         var text by remember { mutableStateOf("") }
-        val lexendFontFamily = FontFamily(Font(R.font.lexendbold, FontWeight.Bold))
         Surface(
             elevation = 4.dp
         ) {
@@ -171,9 +166,8 @@ class MainActivity : ComponentActivity() {
                     onValueChange = { text = it },
                     label = {
                         Text(
-                            text = "Search Location",
-                            fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Bold
+                            text = stringResource(R.string.searchLocation),
+                            fontFamily = lexendFontFamily
                         )
                     },
                     modifier = Modifier
@@ -184,33 +178,20 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
-    @Composable
-    fun LogInButton() {
-        val lexendFontFamily = FontFamily(Font(R.font.lexendmedium, FontWeight.Medium))
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            Button(
-                onClick = { signIn() },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp)
-            ) {
-                Text(text = "Log in", fontFamily = lexendFontFamily, fontWeight = FontWeight.Medium)
-            }
-        }
-    }
-
-    @Preview(showBackground = true)
+    @Preview(name = "Light Mode", showBackground = true)
+    @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true, name = "Dark Mode")
     @Composable
     fun DefaultPreview() {
-        val location by applicationViewModel.getLocationLiveData().observeAsState()
+        val location = LocationDetails("37", "-122")
         SunDialTheme {
-            TwilightFacts("Android", location)
-            LogInButton()
-            SearchBar()
+            // A surface container using the 'background' color from the theme
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colors.background
+            ) {
+                TwilightFacts("Android", location)
+                //SearchBar()
+            }
         }
     }
     
@@ -236,7 +217,7 @@ class MainActivity : ComponentActivity() {
         if (result.resultCode == RESULT_OK){
             user = FirebaseAuth.getInstance().currentUser
         } else {
-            Log.e("MainActivity.kt", "Error logging in " + response?.error?.errorCode)
+            Log.e("MainActivity.kt", getString(R.string.logInErrorMessage) + response?.error?.errorCode)
         }
     }
 }
