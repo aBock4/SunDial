@@ -2,4 +2,10 @@
     <string name="app_name">SunDial</string>
     <string name="sunrise">Sunrise Time</string>
     <string name="sunset">Sunset Time</string>
+    <string name="save">Save</string>
+    <string name="gpsUnavailable">GPS Unavailable</string>
+    <string name="searchLocation">Search Location</string>
+    <string name="logIn">Log in</string>
+    <string name="logInErrorMessage">\"Error logging in \"</string>
+    <string name="cannotSaveMessage">Can\'t save without an account</string>
 </resources>
