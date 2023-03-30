@@ -12,7 +12,7 @@ import com.google.android.gms.location.LocationServices
 import com.sundial.v1001.dto.LocationDetails
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
-//Change the variable context can be private.
+
 class LocationLiveData(private var context: Context) : LiveData<LocationDetails>() {
 
     private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
@@ -64,8 +64,7 @@ class LocationLiveData(private var context: Context) : LiveData<LocationDetails>
         }
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
     }
-    //Change: the location name is shadowed, as its states in the let lambda, you can replace the
-    //name in the lambda with simply the value.
+
     private fun setLocationData(location: Location?) {
         location?.let {
         value = LocationDetails(location.longitude.toString(), location.latitude.toString())
@@ -76,8 +75,7 @@ class LocationLiveData(private var context: Context) : LiveData<LocationDetails>
         super.onInactive()
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
-    //Change: Elvis Operator always returns the left operand so its useless, and the expression is
-    // Never used.
+
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             super.onLocationResult(locationResult)
@@ -86,9 +84,7 @@ class LocationLiveData(private var context: Context) : LiveData<LocationDetails>
             }
         }
     }
-    //Change: ONE_MINUTE is a constant so marking it as constant is good, its also not used
-    //in another area of the code so it can be private. Also using value instead of a hard coded number
-    // lets the integer be stated instead of it automatically infers the type.
+
     companion object {
         private const val ONE_MINUTE : Long = 60000
         private const val INTERVAL_CUT : Byte = 4
