@@ -279,7 +279,6 @@ class MainActivity : ComponentActivity() {
                 pm.getPackageInfo(uri, PackageManager.GET_ACTIVITIES)
                 finish();
             } catch (e: PackageManager.NameNotFoundException) {
-                // application is not installed
             }
         }
 
