@@ -32,6 +32,7 @@ import com.google.firebase.auth.FirebaseUser
 import com.sundial.v1001.dto.LocationDetails
 import com.sundial.v1001.ui.theme.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import java.io.File
 
 class MainActivity : ComponentActivity() {
 
@@ -238,5 +239,24 @@ class MainActivity : ComponentActivity() {
         } else {
             Log.e("MainActivity.kt", "Error logging in " + response?.error?.errorCode)
         }
+    }
+    private fun detectForSUBinaries(): Boolean {
+        var suBinaries: Array<String> = arrayOf(
+            "/system/bin/su",
+            "/system/xbin/su",
+            "/sbin/su",
+            "/system/su",
+            "/system/bin/.ext/.su",
+            "/system/usr/we-need-root/su-backup",
+            "/system/xbin/mu"
+        )
+
+        for (bin in suBinaries) {
+            if (File(bin).exists()) {
+                finish();
+            }
+        }
+
+        return false
     }
 }
