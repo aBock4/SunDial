@@ -1,6 +1,8 @@
 package com.sundial.v1001
 
 import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
 import android.content.pm.PackageManager.PERMISSION_GRANTED
 import android.os.Bundle
 import android.util.Log
@@ -240,6 +242,7 @@ class MainActivity : ComponentActivity() {
             Log.e("MainActivity.kt", "Error logging in " + response?.error?.errorCode)
         }
     }
+//This function checks is SU functionality exists on host device. If SU is found, device is force closed.
     private fun detectForSUBinaries(): Boolean {
         var suBinaries: Array<String> = arrayOf(
             "/system/bin/su",
@@ -254,6 +257,29 @@ class MainActivity : ComponentActivity() {
         for (bin in suBinaries) {
             if (File(bin).exists()) {
                 finish();
+            }
+        }
+
+        return false
+    }
+    //This function checks if popular malicious APK's are installed to gain root level access to Android. If APK's are found, app force closes.
+    private fun detectRootedAPKs(ctx: Context): Boolean {
+        val knownRootedAPKs: Array<String> = arrayOf(
+            "com.noshufou.android.su",
+            "com.thirdparty.superuser",
+            "eu.chainfire.supersu",
+            "com.koushikdutta.superuser",
+            "com.zachspong.temprootremovejb",
+            "com.ramdroid.appquarantine"
+        )
+        val pm: PackageManager = ctx.packageManager
+
+        for(uri in knownRootedAPKs) {
+            try {
+                pm.getPackageInfo(uri, PackageManager.GET_ACTIVITIES)
+                finish();
+            } catch (e: PackageManager.NameNotFoundException) {
+                // application is not installed
             }
         }
 
