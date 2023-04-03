@@ -5,7 +5,6 @@ import retrofit2.Call
 import retrofit2.http.GET
 
 interface ITwilightDAO {
-
     @GET("/json")
     fun getData() : Call<ArrayList<Twilight>>
 }
