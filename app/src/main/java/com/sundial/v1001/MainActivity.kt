@@ -30,6 +30,7 @@ import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.sundial.v1001.dto.LocationDetails
+import com.sundial.v1001.dto.User
 import com.sundial.v1001.ui.theme.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -37,7 +38,7 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModel<MainViewModel>()
     private val applicationViewModel : ApplicationViewModel by viewModel<ApplicationViewModel>()
-
+    private var firebaseUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
     private var user: FirebaseUser? = null
 
 
@@ -53,7 +54,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     TwilightFacts("Android", location)
                     //SearchBar()
-                    //LogInButton()
+                    LogInButton()
                 }
             }
             prepLocationUpdates()
@@ -86,6 +87,7 @@ class MainActivity : ComponentActivity() {
     fun TwilightFacts(name: String, location: LocationDetails?) {
         var sunrise by remember { mutableStateOf("") }
         var sunset by remember { mutableStateOf("") }
+        var locationName by remember{ mutableStateOf("") }
         val lexendFontFamily = FontFamily(
             Font(R.font.lexendregular, FontWeight.Normal),
             Font(R.font.lexendbold, FontWeight.Bold),
@@ -93,8 +95,10 @@ class MainActivity : ComponentActivity() {
             Font(R.font.lexendlight, FontWeight.Light),
             Font(R.font.lexendmedium, FontWeight.Medium)
         )
+
         var currentLatitude = location?.latitude
         var currentLongitude = location?.longitude
+
 
         val context = LocalContext.current
         Box(
@@ -107,7 +111,6 @@ class MainActivity : ComponentActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                GPS(location)
                 OutlinedTextField(
                     value = sunrise,
                     onValueChange = { sunrise = it },
@@ -143,17 +146,30 @@ class MainActivity : ComponentActivity() {
                         fontWeight = FontWeight.Medium
                     )
                 }
+                OutlinedTextField(
+                    value = locationName,
+                    onValueChange = { locationName = it },
+                    label = {
+                        Text(
+                            text = "Name this Location",
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                )
+                GPS(location)
                 Button(
                     onClick = {
-                        if(user == null) {signIn()}
-                        else{
+                        //if(firebaseUser == null) {signIn()}
                             if (currentLongitude != null) {
                                 if (currentLatitude != null) {
-                                    viewModel.saveLocation(currentLongitude, currentLatitude)
-                                    Toast.makeText(context, "$user", Toast.LENGTH_LONG).show()
+                                    val location = LocationDetails(currentLongitude,currentLatitude)
+                                    viewModel.location = location
+                                    viewModel.locationName = locationName
+                                    viewModel.saveLocation()
                                 }
                             }
-                        }
+                        //}
 
                     }
                 ) {
@@ -259,7 +275,12 @@ class MainActivity : ComponentActivity() {
     private fun signInResult(result: FirebaseAuthUIAuthenticationResult){
         val response = result.idpResponse
         if (result.resultCode == RESULT_OK){
-            user = FirebaseAuth.getInstance().currentUser
+            firebaseUser = FirebaseAuth.getInstance().currentUser
+            firebaseUser?.let{
+                val user = User(it.uid, it.displayName)
+                viewModel.user = user
+                viewModel.saveUser()
+            }
         } else {
             Log.e("MainActivity.kt", "Error logging in " + response?.error?.errorCode)
         }
