@@ -13,6 +13,12 @@ import com.sundial.v1001.dto.LocationDetails
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 
+/**
+ * Generates a location using the Fused Location Provider. Permissions for ACCESS_FINE_LOCATION
+ * and ACCESS_COARSE_LOCATION need to be granted.
+ *
+ * @param context A Context used for live data
+ */
 class LocationLiveData(var context: Context) : LiveData<LocationDetails>() {
 
     private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)

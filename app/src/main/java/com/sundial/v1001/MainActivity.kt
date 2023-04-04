@@ -33,14 +33,21 @@ import com.sundial.v1001.dto.LocationDetails
 import com.sundial.v1001.ui.theme.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
+/**
+ * Main activity of SunDial - provides UI display and handles input
+ */
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModel<MainViewModel>()
-    private val applicationViewModel : ApplicationViewModel by viewModel<ApplicationViewModel>()
+    private val applicationViewModel: ApplicationViewModel by viewModel<ApplicationViewModel>()
 
     private var user: FirebaseUser? = null
 
-
+    /**
+     * Initializes the activity's UI and location updates
+     *
+     * @param savedInstanceState Bundle containing the saved state
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -81,7 +88,12 @@ class MainActivity : ComponentActivity() {
         applicationViewModel.startLocationUpdates()
     }
 
-
+    /**
+     * Composable function that displays the times for sunrise & sunset at a location
+     *
+     * @param name Location name
+     * @param location The latitude and longitude for a location
+     */
     @Composable
     fun TwilightFacts(name: String, location: LocationDetails?) {
         var sunrise by remember { mutableStateOf("") }
@@ -144,6 +156,11 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    /**
+     * Composable function to display coordinates
+     *
+     * @param location The latitude and longitude for a location
+     */
     private @Composable
     fun GPS(location: LocationDetails?) {
         location?.let {
@@ -178,7 +195,6 @@ class MainActivity : ComponentActivity() {
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-
                 )
             }
         }
