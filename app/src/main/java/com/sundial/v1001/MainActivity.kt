@@ -53,7 +53,7 @@ class MainActivity : ComponentActivity() {
                 ) {
                     TwilightFacts("Android", location)
                     //SearchBar()
-                    LogInButton()
+                    //LogInButton()
                 }
             }
             prepLocationUpdates()
@@ -93,6 +93,9 @@ class MainActivity : ComponentActivity() {
             Font(R.font.lexendlight, FontWeight.Light),
             Font(R.font.lexendmedium, FontWeight.Medium)
         )
+        var currentLatitude = location?.latitude
+        var currentLongitude = location?.longitude
+
         val context = LocalContext.current
         Box(
             modifier = Modifier
@@ -135,6 +138,27 @@ class MainActivity : ComponentActivity() {
                 ) {
                     Text(
                         text = "Save",
+                        color = Color.White,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+                Button(
+                    onClick = {
+                        if(user == null) {signIn()}
+                        else{
+                            if (currentLongitude != null) {
+                                if (currentLatitude != null) {
+                                    viewModel.saveLocation(currentLongitude, currentLatitude)
+                                    Toast.makeText(context, "$user", Toast.LENGTH_LONG).show()
+                                }
+                            }
+                        }
+
+                    }
+                ) {
+                    Text(
+                        text = "Save Location",
                         color = Color.White,
                         fontFamily = lexendFontFamily,
                         fontWeight = FontWeight.Medium
@@ -216,7 +240,8 @@ class MainActivity : ComponentActivity() {
     
     private fun signIn(){
         val providers = arrayListOf(
-            AuthUI.IdpConfig.EmailBuilder().build()
+            AuthUI.IdpConfig.EmailBuilder().build(),
+            AuthUI.IdpConfig.GoogleBuilder().build()
         )
         val signinIntent = AuthUI.getInstance()
             .createSignInIntentBuilder()
