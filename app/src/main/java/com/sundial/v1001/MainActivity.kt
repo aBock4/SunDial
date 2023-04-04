@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
         if (isGranted){
             requestLocationUpdates()
         } else{
-            Toast.makeText(this, "GPS Unavailable", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, R.string.gps_unavailable, Toast.LENGTH_LONG).show()
         }
     }
 
