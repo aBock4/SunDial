@@ -1,7 +1,9 @@
 package com.sundial.v1001
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -10,6 +12,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -18,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -53,6 +57,10 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     TwilightFacts("Android", location)
+                    LinkButton(
+                        linkText = "https://support.google.com/maps/answer/18539?hl=en&co=GENIE.Platform%3DDesktop",
+                        buttonText = "What to do with coordinates?"
+                    )
                     //SearchBar()
                     LogInButton()
                 }
@@ -191,6 +199,26 @@ class MainActivity : ComponentActivity() {
             Text(text = location.longitude)
         }
     }
+
+    @Composable
+    fun LinkButton(linkText: String, buttonText: String) {
+        val context = LocalContext.current
+
+        Button(
+            onClick = {
+                val uri = Uri.parse(linkText)
+                val intent = Intent(Intent.ACTION_VIEW, uri)
+                context.startActivity(intent)
+            },
+            modifier = Modifier
+                .background(color = Orange)
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(text = buttonText, style = MaterialTheme.typography.button)
+        }
+    }
+
 
     @Composable
     fun SearchBar() {
