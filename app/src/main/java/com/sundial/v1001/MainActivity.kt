@@ -57,10 +57,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     TwilightFacts("Android", location)
-                    LinkButton(
-                        linkText = "https://support.google.com/maps/answer/18539?hl=en&co=GENIE.Platform%3DDesktop",
-                        buttonText = "What to do with coordinates?"
-                    )
+                    LinkButton("https://support.google.com/maps/answer/18539?hl=en&co=GENIE.Platform%3DDesktop", "What to do with coordinates?")
                     //SearchBar()
                     LogInButton()
                 }
@@ -204,18 +201,20 @@ class MainActivity : ComponentActivity() {
     fun LinkButton(linkText: String, buttonText: String) {
         val context = LocalContext.current
 
-        Button(
-            onClick = {
-                val uri = Uri.parse(linkText)
-                val intent = Intent(Intent.ACTION_VIEW, uri)
-                context.startActivity(intent)
-            },
-            modifier = Modifier
-                .background(color = Orange)
-                .fillMaxWidth()
-                .padding(16.dp)
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomStart
         ) {
-            Text(text = buttonText, style = MaterialTheme.typography.button)
+            Button(
+                onClick = {
+                    val uri = Uri.parse(linkText)
+                    val intent = Intent(Intent.ACTION_VIEW, uri)
+                    context.startActivity(intent)
+                },
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(text = buttonText)
+            }
         }
     }
 
