@@ -57,9 +57,10 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     TwilightFacts("Android", location)
-                    LinkButton("https://support.google.com/maps/answer/18539?hl=en&co=GENIE.Platform%3DDesktop", "What to do with coordinates?")
+                    LinkButton("https://support.google.com/maps/answer/18539?hl=en&co=GENIE.Platform%3DDesktop", "How do I use Coordinates?")
                     //SearchBar()
                     LogInButton()
+                    WeatherAppButton()
                 }
             }
             prepLocationUpdates()
@@ -188,6 +189,33 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    @Composable
+    fun WeatherAppButton() {
+        val context = LocalContext.current
+
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.TopStart
+        ) {
+            Button(
+                onClick = {
+                    val intent =
+                        context.packageManager.getLaunchIntentForPackage("com.example.weatherapp")
+                    if (intent != null) {
+                        context.startActivity(intent)
+                    } else {
+                        Toast.makeText(context, "Weather app not found", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                modifier = Modifier
+                    .padding(16.dp)
+            ) {
+                Text(text = "Open Weather App")
+            }
+        }
+    }
+
 
     private @Composable
     fun GPS(location: LocationDetails?) {
