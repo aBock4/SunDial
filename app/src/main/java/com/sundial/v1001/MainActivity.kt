@@ -1,7 +1,9 @@
 package com.sundial.v1001
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -11,6 +13,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -23,6 +26,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -74,8 +78,10 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     TwilightFacts("Android", location, locations)
+                    LinkButton("https://support.google.com/maps/answer/18539?hl=en&co=GENIE.Platform%3DDesktop", "How do I use Coordinates?")
                     //SearchBar()
                     LogInButton()
+                    WeatherAppButton()
                 }
             }
             prepLocationUpdates()
@@ -200,7 +206,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @Composable
+   @Composable
     fun LocationSpinner (locations: List<Location>) {
         var locationText by remember { mutableStateOf("")}
         var expanded by remember { mutableStateOf(false)}
@@ -230,14 +236,61 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+    fun WeatherAppButton() {
+        val context = LocalContext.current
 
-    @Composable
-    private fun GPS(location: LocationDetails?) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.TopStart
+        ) {
+            Button(
+                onClick = {
+                    val intent =
+                        context.packageManager.getLaunchIntentForPackage("com.example.weatherapp")
+                    if (intent != null) {
+                        context.startActivity(intent)
+                    } else {
+                        Toast.makeText(context, "Weather app not found", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                modifier = Modifier
+                    .padding(16.dp)
+            ) {
+                Text(text = "Open Weather App")
+            }
+        }
+    }
+
+
+    private @Composable
+    fun GPS(location: LocationDetails?) {
         location?.let {
             Text(text = location.latitude)
             Text(text = location.longitude)
         }
     }
+
+    @Composable
+    fun LinkButton(linkText: String, buttonText: String) {
+        val context = LocalContext.current
+
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomStart
+        ) {
+            Button(
+                onClick = {
+                    val uri = Uri.parse(linkText)
+                    val intent = Intent(Intent.ACTION_VIEW, uri)
+                    context.startActivity(intent)
+                },
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(text = buttonText)
+            }
+        }
+    }
+
 
     @Composable
     fun SearchBar() {
