@@ -29,6 +29,7 @@ import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.sundial.v1001.dto.Location
 import com.sundial.v1001.dto.LocationDetails
 import com.sundial.v1001.dto.User
 import com.sundial.v1001.ui.theme.*
@@ -88,6 +89,7 @@ class MainActivity : ComponentActivity() {
         var sunrise by remember { mutableStateOf("") }
         var sunset by remember { mutableStateOf("") }
         var locationName by remember{ mutableStateOf("") }
+        var locationId by remember{ mutableStateOf("") }
         val lexendFontFamily = FontFamily(
             Font(R.font.lexendregular, FontWeight.Normal),
             Font(R.font.lexendbold, FontWeight.Bold),
@@ -163,9 +165,8 @@ class MainActivity : ComponentActivity() {
                         //if(firebaseUser == null) {signIn()}
                             if (currentLongitude != null) {
                                 if (currentLatitude != null) {
-                                    val location = LocationDetails(currentLongitude,currentLatitude)
+                                    val location = Location(locationId, locationName = locationName, currentLongitude, currentLatitude)
                                     viewModel.location = location
-                                    viewModel.locationName = locationName
                                     viewModel.saveLocation()
                                 }
                             }

@@ -7,8 +7,6 @@
 
 - Adam Bockhorst
 
-- Summer Gasaway
-
 - Eddie Greenlee
 
 - Jackson Pinchot
