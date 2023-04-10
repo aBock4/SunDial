@@ -11,32 +11,40 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.sundial.v1001.dto.Location
 import com.sundial.v1001.dto.LocationDetails
 import com.sundial.v1001.dto.User
 import com.sundial.v1001.ui.theme.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
+
 
 class MainActivity : ComponentActivity() {
 
@@ -44,19 +52,32 @@ class MainActivity : ComponentActivity() {
     private val applicationViewModel : ApplicationViewModel by viewModel<ApplicationViewModel>()
     private var firebaseUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
     private var user: FirebaseUser? = null
+    private val lexendFontFamily = FontFamily(
+        Font(R.font.lexendregular, FontWeight.Normal),
+        Font(R.font.lexendbold, FontWeight.Bold),
+        Font(R.font.lexendblack, FontWeight.Black),
+        Font(R.font.lexendlight, FontWeight.Light),
+        Font(R.font.lexendmedium, FontWeight.Medium)
+    )
+    private var selectedLocation: Location? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val location by applicationViewModel.getLocationLiveData().observeAsState()
+            //val locations by viewModel.locations.observeAsState(initial = emptyList())
+            val locations = ArrayList<Location>()
+            locations.add(Location(locationName = "Home"))
+            locations.add(Location(locationName = "Away"))
+            locations.add(Location(locationName = "Work"))
             SunDialTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    TwilightFacts("Android", location)
+                    TwilightFacts("Android", location, locations)
                     LinkButton("https://support.google.com/maps/answer/18539?hl=en&co=GENIE.Platform%3DDesktop", "How do I use Coordinates?")
                     //SearchBar()
                     LogInButton()
@@ -90,22 +111,13 @@ class MainActivity : ComponentActivity() {
 
 
     @Composable
-    fun TwilightFacts(name: String, location: LocationDetails?) {
+    fun TwilightFacts(name: String, location: LocationDetails?, locations: List<Location> = ArrayList<Location>()) {
         var sunrise by remember { mutableStateOf("") }
         var sunset by remember { mutableStateOf("") }
         var locationName by remember{ mutableStateOf("") }
-        val lexendFontFamily = FontFamily(
-            Font(R.font.lexendregular, FontWeight.Normal),
-            Font(R.font.lexendbold, FontWeight.Bold),
-            Font(R.font.lexendblack, FontWeight.Black),
-            Font(R.font.lexendlight, FontWeight.Light),
-            Font(R.font.lexendmedium, FontWeight.Medium)
-        )
-
+        var locationId by remember{ mutableStateOf("") }
         var currentLatitude = location?.latitude
         var currentLongitude = location?.longitude
-
-
         val context = LocalContext.current
         Box(
             modifier = Modifier
@@ -117,6 +129,7 @@ class MainActivity : ComponentActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                LocationSpinner(locations = locations)
                 OutlinedTextField(
                     value = sunrise,
                     onValueChange = { sunrise = it },
@@ -126,6 +139,7 @@ class MainActivity : ComponentActivity() {
                             fontFamily = lexendFontFamily,
                             fontWeight = FontWeight.Bold
                         )
+                        Icon(ImageVector.vectorResource(id = R.drawable.baseline_wb_sunny), contentDescription = "", modifier = Modifier.padding(start = 235.dp))
                     }
                 )
                 OutlinedTextField(
@@ -137,6 +151,7 @@ class MainActivity : ComponentActivity() {
                             fontFamily = lexendFontFamily,
                             fontWeight = FontWeight.Bold
                         )
+                        Icon(ImageVector.vectorResource(id = R.drawable.baseline_bedtime), contentDescription = "", modifier = Modifier.padding(start = 237.dp))
                     },
 
                     )
@@ -159,8 +174,10 @@ class MainActivity : ComponentActivity() {
                         Text(
                             text = "Name this Location",
                             fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp, modifier = Modifier.padding(end = 10.dp)
                         )
+                        Icon(ImageVector.vectorResource(id = R.drawable.pin_drop), contentDescription = "", modifier = Modifier.padding(start = 240.dp))
                     }
                 )
                 GPS(location)
@@ -169,9 +186,8 @@ class MainActivity : ComponentActivity() {
                         //if(firebaseUser == null) {signIn()}
                             if (currentLongitude != null) {
                                 if (currentLatitude != null) {
-                                    val location = LocationDetails(currentLongitude,currentLatitude)
+                                    val location = Location(locationId, locationName = locationName, currentLongitude, currentLatitude)
                                     viewModel.location = location
-                                    viewModel.locationName = locationName
                                     viewModel.saveLocation()
                                 }
                             }
@@ -190,7 +206,36 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    @Composable
+   @Composable
+    fun LocationSpinner (locations: List<Location>) {
+        var locationText by remember { mutableStateOf("")}
+        var expanded by remember { mutableStateOf(false)}
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            Row(Modifier
+                .padding(24.dp)
+                .clickable {
+                    expanded = !expanded
+                }
+                .padding(8.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = locationText, fontSize = 18.sp, modifier = Modifier.padding(end = 8.dp), fontFamily = lexendFontFamily, fontWeight = FontWeight.Medium)
+                Icon(imageVector = Icons.Filled.ArrowDropDown, contentDescription = "")
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false}) {
+                    locations.forEach {
+                            location -> DropdownMenuItem(onClick = {
+                        expanded = false
+                        locationText = location.toString()
+                        selectedLocation = location
+                    }) {
+                        Text(text = location.toString())
+                    }
+                    }
+                }
+            }
+        }
+    }
     fun WeatherAppButton() {
         val context = LocalContext.current
 
@@ -302,8 +347,12 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun DefaultPreview() {
         val location by applicationViewModel.getLocationLiveData().observeAsState()
+        val locations = ArrayList<Location>()
+        locations.add(Location(locationName = "Home"))
+        locations.add(Location(locationName = "Away"))
+        locations.add(Location(locationName = "Work"))
         SunDialTheme {
-            TwilightFacts("Android", location)
+            TwilightFacts("Android", location, locations)
             LogInButton()
             SearchBar()
         }
