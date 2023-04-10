@@ -16,13 +16,16 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
@@ -35,18 +38,27 @@ import com.sundial.v1001.dto.User
 import com.sundial.v1001.ui.theme.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
+
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModel<MainViewModel>()
     private val applicationViewModel : ApplicationViewModel by viewModel<ApplicationViewModel>()
     private var firebaseUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
     private var user: FirebaseUser? = null
+    private val lexendFontFamily = FontFamily(
+        Font(R.font.lexendregular, FontWeight.Normal),
+        Font(R.font.lexendbold, FontWeight.Bold),
+        Font(R.font.lexendblack, FontWeight.Black),
+        Font(R.font.lexendlight, FontWeight.Light),
+        Font(R.font.lexendmedium, FontWeight.Medium)
+    )
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val location by applicationViewModel.getLocationLiveData().observeAsState()
+            val locations by viewModel.locations.observeAsState(initial = emptyList())
             SunDialTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
@@ -90,17 +102,9 @@ class MainActivity : ComponentActivity() {
         var sunset by remember { mutableStateOf("") }
         var locationName by remember{ mutableStateOf("") }
         var locationId by remember{ mutableStateOf("") }
-        val lexendFontFamily = FontFamily(
-            Font(R.font.lexendregular, FontWeight.Normal),
-            Font(R.font.lexendbold, FontWeight.Bold),
-            Font(R.font.lexendblack, FontWeight.Black),
-            Font(R.font.lexendlight, FontWeight.Light),
-            Font(R.font.lexendmedium, FontWeight.Medium)
-        )
-
         var currentLatitude = location?.latitude
         var currentLongitude = location?.longitude
-
+        val drawable = resources.getDrawable(R.drawable.pin_drop, theme)
 
         val context = LocalContext.current
         Box(
@@ -122,6 +126,7 @@ class MainActivity : ComponentActivity() {
                             fontFamily = lexendFontFamily,
                             fontWeight = FontWeight.Bold
                         )
+                        Icon(ImageVector.vectorResource(id = R.drawable.baseline_wb_sunny), contentDescription = "", modifier = Modifier.padding(start = 235.dp))
                     }
                 )
                 OutlinedTextField(
@@ -133,6 +138,7 @@ class MainActivity : ComponentActivity() {
                             fontFamily = lexendFontFamily,
                             fontWeight = FontWeight.Bold
                         )
+                        Icon(ImageVector.vectorResource(id = R.drawable.baseline_bedtime), contentDescription = "", modifier = Modifier.padding(start = 237.dp))
                     },
 
                     )
@@ -155,8 +161,10 @@ class MainActivity : ComponentActivity() {
                         Text(
                             text = "Name this Location",
                             fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp, modifier = Modifier.padding(end = 10.dp)
                         )
+                        Icon(ImageVector.vectorResource(id = R.drawable.pin_drop), contentDescription = "", modifier = Modifier.padding(start = 240.dp))
                     }
                 )
                 GPS(location)
@@ -185,8 +193,10 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private @Composable
-    fun GPS(location: LocationDetails?) {
+
+
+    @Composable
+    private fun GPS(location: LocationDetails?) {
         location?.let {
             Text(text = location.latitude)
             Text(text = location.longitude)
