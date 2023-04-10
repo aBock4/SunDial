@@ -1,6 +1,6 @@
 package com.sundial.v1001.dto
 
-class Location(var locationId : String = "", var locationName : String = "", val longitude : String, val latitude : String) {
+data class Location(var locationId : String = "", var locationName : String = "", val longitude : String = "0.00", val latitude : String = "0.00") {
 
         override fun toString(): String {
             return "$locationName $longitude $latitude"

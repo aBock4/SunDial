@@ -9,8 +9,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -52,20 +55,25 @@ class MainActivity : ComponentActivity() {
         Font(R.font.lexendlight, FontWeight.Light),
         Font(R.font.lexendmedium, FontWeight.Medium)
     )
+    private var selectedLocation: Location? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             val location by applicationViewModel.getLocationLiveData().observeAsState()
-            val locations by viewModel.locations.observeAsState(initial = emptyList())
+            //val locations by viewModel.locations.observeAsState(initial = emptyList())
+            val locations = ArrayList<Location>()
+            locations.add(Location(locationName = "Home"))
+            locations.add(Location(locationName = "Away"))
+            locations.add(Location(locationName = "Work"))
             SunDialTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    TwilightFacts("Android", location)
+                    TwilightFacts("Android", location, locations)
                     //SearchBar()
                     LogInButton()
                 }
@@ -97,15 +105,13 @@ class MainActivity : ComponentActivity() {
 
 
     @Composable
-    fun TwilightFacts(name: String, location: LocationDetails?) {
+    fun TwilightFacts(name: String, location: LocationDetails?, locations: List<Location> = ArrayList<Location>()) {
         var sunrise by remember { mutableStateOf("") }
         var sunset by remember { mutableStateOf("") }
         var locationName by remember{ mutableStateOf("") }
         var locationId by remember{ mutableStateOf("") }
         var currentLatitude = location?.latitude
         var currentLongitude = location?.longitude
-        val drawable = resources.getDrawable(R.drawable.pin_drop, theme)
-
         val context = LocalContext.current
         Box(
             modifier = Modifier
@@ -117,6 +123,7 @@ class MainActivity : ComponentActivity() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                LocationSpinner(locations = locations)
                 OutlinedTextField(
                     value = sunrise,
                     onValueChange = { sunrise = it },
@@ -193,7 +200,36 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
+    @Composable
+    fun LocationSpinner (locations: List<Location>) {
+        var locationText by remember { mutableStateOf("")}
+        var expanded by remember { mutableStateOf(false)}
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            Row(Modifier
+                .padding(24.dp)
+                .clickable {
+                    expanded = !expanded
+                }
+                .padding(8.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = locationText, fontSize = 18.sp, modifier = Modifier.padding(end = 8.dp), fontFamily = lexendFontFamily, fontWeight = FontWeight.Medium)
+                Icon(imageVector = Icons.Filled.ArrowDropDown, contentDescription = "")
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false}) {
+                    locations.forEach {
+                            location -> DropdownMenuItem(onClick = {
+                        expanded = false
+                        locationText = location.toString()
+                        selectedLocation = location
+                    }) {
+                        Text(text = location.toString())
+                    }
+                    }
+                }
+            }
+        }
+    }
 
     @Composable
     private fun GPS(location: LocationDetails?) {
@@ -258,8 +294,12 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun DefaultPreview() {
         val location by applicationViewModel.getLocationLiveData().observeAsState()
+        val locations = ArrayList<Location>()
+        locations.add(Location(locationName = "Home"))
+        locations.add(Location(locationName = "Away"))
+        locations.add(Location(locationName = "Work"))
         SunDialTheme {
-            TwilightFacts("Android", location)
+            TwilightFacts("Android", location, locations)
             LogInButton()
             SearchBar()
         }
