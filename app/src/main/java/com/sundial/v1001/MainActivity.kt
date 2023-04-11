@@ -236,6 +236,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+    @Composable
     fun WeatherAppButton() {
         val context = LocalContext.current
 
