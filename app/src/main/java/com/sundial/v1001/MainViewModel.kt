@@ -17,7 +17,9 @@ import com.sundial.v1001.dto.LocationDetails
 import org.koin.core.component.getScopeId
 
 class MainViewModel (private var twilightService : ITwilightService = TwilightService()) : ViewModel() {
+    internal val NEW_LOCATION = "New Location"
     var twilight : MutableLiveData<List<Twilight>> = MutableLiveData<List<Twilight>>()
+    var locations: MutableLiveData<List<Location>> = MutableLiveData<List<Location>>()
     var user : User? = null
     var location : Location? =null
 
@@ -34,6 +36,12 @@ class MainViewModel (private var twilightService : ITwilightService = TwilightSe
             twilight.postValue(innerTwilight)
         }
     }
+
+    /*fun fetchLocations() {
+        viewModelScope.launch {
+            locationService.fetchLocations()
+        }
+    }*/
     fun saveLocation() {
         user?.let {
                 user ->
