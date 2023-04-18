@@ -2,4 +2,5 @@
     <string name="app_name">SunDial</string>
     <string name="sunrise">Sunrise Time</string>
     <string name="sunset">Sunset Time</string>
+    <string name="LocationName">Location Name</string>
 </resources>

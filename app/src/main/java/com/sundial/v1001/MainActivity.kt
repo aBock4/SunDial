@@ -127,7 +127,8 @@ class MainActivity : ComponentActivity() {
                 )
                 Icon(imageVector = Icons.Filled.ArrowDropDown, contentDescription = "")
                 DropdownMenu(expanded = expanded, onDismissRequest = {expanded = false}) {
-                    locations.forEach { location -> DropdownMenuItem(onClick = {
+                    locations.forEach {
+                            location -> DropdownMenuItem(onClick = {
                         expanded = false
 
                         if (location.locationName == viewModel.NEW_LOCATION) {
@@ -163,6 +164,9 @@ class MainActivity : ComponentActivity() {
         var locationId by remember { mutableStateOf("") }
         var currentLatitude = location?.latitude
         var currentLongitude = location?.longitude
+        var inLocation by remember { mutableStateOf(selectedLocation.locationName)}
+        var inSunrise by remember { mutableStateOf(selectedLocation.sunrise)}
+        var inSunset by remember { mutableStateOf(selectedLocation.sunset)}
         val context = LocalContext.current
         Box(
             modifier = Modifier
@@ -225,7 +229,7 @@ class MainActivity : ComponentActivity() {
                     onValueChange = { locationName = it },
                     label = {
                         Text(
-                            text = "Name this Location",
+                            stringResource(R.string.LocationName),
                             fontFamily = lexendFontFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp, modifier = Modifier.padding(end = 10.dp)
@@ -240,21 +244,25 @@ class MainActivity : ComponentActivity() {
                 GPS(location)
                 Button(
                     onClick = {
-                        //if(firebaseUser == null) {signIn()}
-                        if (currentLongitude != null) {
-                            if (currentLatitude != null) {
-                                val location = Location(
-                                    locationId,
-                                    locationName = locationName,
-                                    currentLongitude,
-                                    currentLatitude
-                                )
-                                viewModel.location = location
-                                viewModel.saveLocation()
+                        selectedLocation.apply{
+                            locationName = inLocationName
+                            if(currentLatitude != null)
+                            {
+                                if(currentLongitude != null)
+                                {
+                                    latitude = currentLatitude
+                                    longitude = currentLongitude
+                                }
                             }
+                            sunrise = inSunrise
+                            sunset = inSunset
                         }
-                        //}
-
+                        viewModel.saveLocation()
+                        Toast.makeText(
+                            context,
+                            "$inLocationName $currentLatitude $currentLongitude $inSunrise $inSunset",
+                            Toast.LENGTH_LONG
+                        ).show()
                     }
                 ) {
                     Text(
