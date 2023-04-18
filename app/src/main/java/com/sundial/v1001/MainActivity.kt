@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
     private val applicationViewModel: ApplicationViewModel by viewModel<ApplicationViewModel>()
     private var firebaseUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
     private var user: FirebaseUser? = null
-    private var inLocationName: String=""
+    private var inLocationName: String = ""
     private val lexendFontFamily = FontFamily(
         Font(R.font.lexendregular, FontWeight.Normal),
         Font(R.font.lexendbold, FontWeight.Bold),
@@ -126,31 +126,40 @@ class MainActivity : ComponentActivity() {
                     fontWeight = FontWeight.Medium
                 )
                 Icon(imageVector = Icons.Filled.ArrowDropDown, contentDescription = "")
-                DropdownMenu(expanded = expanded, onDismissRequest = {expanded = false}) {
-                    locations.forEach {
-                            location -> DropdownMenuItem(onClick = {
-                        expanded = false
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    locations.forEach { location ->
+                        DropdownMenuItem(onClick = {
+                            expanded = false
 
-                        if (location.locationName == viewModel.NEW_LOCATION) {
-                            locationText = ""
-                            location.locationName = ""
-                        } else
-                        {
+                            if (location.locationName == viewModel.NEW_LOCATION) {
+                                locationText = ""
+                                location.locationName = ""
+                            } else {
+                                locationText = location.toString()
+                                selectedLocation = Location(
+                                    longitude = "",
+                                    latitude = "",
+                                    locationName = location.locationName,
+                                    locationId = location.locationId
+                                )
+
+                            }
                             locationText = location.toString()
-                            selectedLocation = Location(longitude = "", latitude = "", locationName = location.locationName, locationId = location.locationId)
-
+                            selectedLocation = location
+                            inLocationName = location.locationName
+                        }) {
+                            Text(
+                                text = location.toString(),
+                                fontFamily = lexendFontFamily,
+                                fontWeight = FontWeight.Medium
+                            )
                         }
-                        locationText = location.toString()
-                        selectedLocation = location
-                        inLocationName = location.locationName
-                    }) {
-                        Text(text = location.toString(), fontFamily = lexendFontFamily, fontWeight = FontWeight.Medium)
-                    }
                     }
                 }
             }
         }
     }
+
     @Composable
     fun TwilightFacts(
         name: String,
@@ -164,9 +173,9 @@ class MainActivity : ComponentActivity() {
         var locationId by remember { mutableStateOf("") }
         var currentLatitude = location?.latitude
         var currentLongitude = location?.longitude
-        var inLocation by remember { mutableStateOf(selectedLocation.locationName)}
-        var inSunrise by remember { mutableStateOf(selectedLocation.sunrise)}
-        var inSunset by remember { mutableStateOf(selectedLocation.sunset)}
+        var inLocation by remember { mutableStateOf(selectedLocation.locationName) }
+        var inSunrise by remember { mutableStateOf(selectedLocation.sunrise) }
+        var inSunset by remember { mutableStateOf(selectedLocation.sunset) }
         val context = LocalContext.current
         Box(
             modifier = Modifier
@@ -232,12 +241,10 @@ class MainActivity : ComponentActivity() {
                 GPS(location)
                 Button(
                     onClick = {
-                        selectedLocation.apply{
+                        selectedLocation.apply {
                             locationName = inLocationName
-                            if(currentLatitude != null)
-                            {
-                                if(currentLongitude != null)
-                                {
+                            if (currentLatitude != null) {
+                                if (currentLongitude != null) {
                                     latitude = currentLatitude
                                     longitude = currentLongitude
                                 }

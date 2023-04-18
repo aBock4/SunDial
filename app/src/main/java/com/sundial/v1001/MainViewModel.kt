@@ -20,15 +20,16 @@ import com.sundial.v1001.dto.LocationDetails
 import com.sundial.v1001.service.locationService
 import org.koin.core.component.getScopeId
 
-class MainViewModel (private var twilightService : ITwilightService = TwilightService()) : ViewModel() {
+class MainViewModel(private var twilightService: ITwilightService = TwilightService()) :
+    ViewModel() {
     internal val NEW_LOCATION = "New Location"
-    var twilight : MutableLiveData<List<Twilight>> = MutableLiveData<List<Twilight>>()
+    var twilight: MutableLiveData<List<Twilight>> = MutableLiveData<List<Twilight>>()
     var locations: MutableLiveData<List<Location>> = MutableLiveData<List<Location>>()
     var selectedLocation by mutableStateOf(Location())
-    var user : User? = null
-    var location : Location? =null
+    var user: User? = null
+    var location: Location? = null
 
-    private lateinit var firestore : FirebaseFirestore
+    private lateinit var firestore: FirebaseFirestore
 
     init {
         firestore = FirebaseFirestore.getInstance()
@@ -37,32 +38,31 @@ class MainViewModel (private var twilightService : ITwilightService = TwilightSe
     }
 
     private fun listenToLocations() {
-        user?.let {
-            user ->
-            firestore.collection("users").document(user.uid).collection("locations").addSnapshotListener {
-                snapshot, e ->
-                if (e != null) {
-                    Log.w("Listen failed", e)
-                    return@addSnapshotListener
-                }
-                snapshot?.let {
-                    val allLocations = ArrayList<Location>()
-                    allLocations.add(Location(locationName = NEW_LOCATION))
-                    val documents = snapshot.documents
-                    documents.forEach {
-                        val location = it.toObject(Location::class.java)
-                        location?.let{
-                            allLocations.add(it)
-                        }
+        user?.let { user ->
+            firestore.collection("users").document(user.uid).collection("locations")
+                .addSnapshotListener { snapshot, e ->
+                    if (e != null) {
+                        Log.w("Listen failed", e)
+                        return@addSnapshotListener
                     }
-                    locations.value = allLocations
+                    snapshot?.let {
+                        val allLocations = ArrayList<Location>()
+                        allLocations.add(Location(locationName = NEW_LOCATION))
+                        val documents = snapshot.documents
+                        documents.forEach {
+                            val location = it.toObject(Location::class.java)
+                            location?.let {
+                                allLocations.add(it)
+                            }
+                        }
+                        locations.value = allLocations
+                    }
                 }
-            }
         }
     }
 
-    fun fetchTwilight(){
-        viewModelScope.launch{
+    fun fetchTwilight() {
+        viewModelScope.launch {
             val innerTwilight = twilightService.fetchTwilight()
             twilight.postValue(innerTwilight)
         }
@@ -74,23 +74,24 @@ class MainViewModel (private var twilightService : ITwilightService = TwilightSe
         }
     }*/
     fun saveLocation() {
-        user?.let {
-                user ->
-               val document =
-                   if (selectedLocation.locationId == null || selectedLocation.locationId.isEmpty()) {
-                       firestore.collection("users").document(user.uid).collection("locations").document()
-                   } else {
-                       firestore.collection("users").document(user.uid).collection("locations").document(selectedLocation.locationId)
-                   }
-                selectedLocation.locationId = document.id
-                val handle = document.set(selectedLocation)
-                handle.addOnSuccessListener { Log.d("Firebase", "Location Saved") }
-                handle.addOnFailureListener { Log.e("Firebase", "Save failed $it") }
+        user?.let { user ->
+            val document =
+                if (selectedLocation.locationId == null || selectedLocation.locationId.isEmpty()) {
+                    firestore.collection("users").document(user.uid).collection("locations")
+                        .document()
+                } else {
+                    firestore.collection("users").document(user.uid).collection("locations")
+                        .document(selectedLocation.locationId)
+                }
+            selectedLocation.locationId = document.id
+            val handle = document.set(selectedLocation)
+            handle.addOnSuccessListener { Log.d("Firebase", "Location Saved") }
+            handle.addOnFailureListener { Log.e("Firebase", "Save failed $it") }
         }
     }
+
     fun saveUser() {
-        user?.let{
-                user ->
+        user?.let { user ->
             val handle = firestore.collection("users").document(user.uid).set(user)
             handle.addOnSuccessListener { Log.d("Firebase", "Document Saved") }
             handle.addOnFailureListener { Log.e("Firebase", "Save failed $it") }
