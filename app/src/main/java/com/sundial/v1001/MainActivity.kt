@@ -212,18 +212,6 @@ class MainActivity : ComponentActivity() {
                     },
 
                     )
-                Button(
-                    onClick = {
-                        Toast.makeText(context, "$sunrise $sunset", Toast.LENGTH_LONG).show()
-                    }
-                ) {
-                    Text(
-                        text = "Save Time",
-                        color = Color.White,
-                        fontFamily = lexendFontFamily,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
                 OutlinedTextField(
                     value = locationName,
                     onValueChange = { locationName = it },
