@@ -18,7 +18,7 @@ interface ICityService {
     suspend fun fetchCities() : List<City>?
     fun getLocalCityDAO(): ILocalCityDAO
 }
-class CityService(val application: Application) : ICityService {
+class CityService(private val application: Application) : ICityService {
 
     private lateinit var db: CityDatabase
 
