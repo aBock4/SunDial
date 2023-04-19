@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -78,7 +77,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    TwilightFacts(location, locations, selectedLocation, cities)
+                    LocationFacts(location, locations, selectedLocation, cities)
                     LogInButton()
                 }
             }
@@ -210,7 +209,7 @@ class MainActivity : ComponentActivity() {
         list: List<City>,
         label: String = ""
     ) {
-        Box() {
+        Box(contentAlignment = Alignment.Center) {
             OutlinedTextField(
                 modifier = Modifier
                     .onFocusChanged { focusState ->
@@ -261,21 +260,20 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun TwilightFacts(
+    fun LocationFacts(
         location: LocationDetails?,
         locations: List<Location> = ArrayList<Location>(),
         selectedLocation: Location = Location(),
         cities: List<City> = ArrayList<City>()
     ) {
-        var currentLatitude = location?.latitude
-        var currentLongitude = location?.longitude
-        var inLocation by remember(selectedLocation.locationId) { mutableStateOf(selectedLocation.locationName) }
+        val currentLatitude = location?.latitude
+        val currentLongitude = location?.longitude
+        //var inLocation by remember(selectedLocation.locationId) { mutableStateOf(selectedLocation.locationName) }
         var inSunrise by remember(selectedLocation.locationId) { mutableStateOf(selectedLocation.sunrise) }
         var inSunset by remember(selectedLocation.locationId) { mutableStateOf(selectedLocation.sunset) }
         var inLongitude by remember(selectedLocation.longitude) { mutableStateOf(selectedLocation.longitude) }
         var inLatitude by remember(selectedLocation.latitude) { mutableStateOf(selectedLocation.latitude) }
         val context = LocalContext.current
-
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -422,7 +420,6 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun LogInButton() {
-        val lexendFontFamily = FontFamily(Font(R.font.lexendmedium, FontWeight.Medium))
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -434,6 +431,7 @@ class MainActivity : ComponentActivity() {
                     .padding(16.dp)
             ) {
                 Text(text = "Log in", fontFamily = lexendFontFamily, fontWeight = FontWeight.Medium)
+
             }
         }
     }
@@ -447,7 +445,7 @@ class MainActivity : ComponentActivity() {
         locations.add(Location(locationName = "Away"))
         locations.add(Location(locationName = "Work"))
         SunDialTheme {
-            TwilightFacts(location, locations)
+            LocationFacts(location, locations)
             LogInButton()
         }
     }
@@ -479,6 +477,7 @@ class MainActivity : ComponentActivity() {
                 val user = User(it.uid, it.displayName)
                 viewModel.user = user
                 viewModel.saveUser()
+                Toast.makeText(this, "Welcome, ${viewModel.user!!.displayName}", Toast.LENGTH_LONG).show()
             }
         } else {
             Log.e("MainActivity.kt", "Error logging in " + response?.error?.errorCode)

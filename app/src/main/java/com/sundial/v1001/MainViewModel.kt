@@ -17,7 +17,7 @@ import com.sundial.v1001.dto.Location
 import com.sundial.v1001.service.ICityService
 
 
-class MainViewModel(var cityService: ICityService) : ViewModel() {
+class MainViewModel(private var cityService: ICityService) : ViewModel() {
     internal val NEW_LOCATION = "New Location"
     var twilight: MutableLiveData<List<Twilight>> = MutableLiveData<List<Twilight>>()
     var locations: MutableLiveData<List<Location>> = MutableLiveData<List<Location>>()
