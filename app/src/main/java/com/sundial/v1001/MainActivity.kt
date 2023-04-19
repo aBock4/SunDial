@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -23,6 +24,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextRange
@@ -45,7 +47,6 @@ import com.sundial.v1001.dto.Location
 import com.sundial.v1001.dto.LocationDetails
 import com.sundial.v1001.dto.User
 import com.sundial.v1001.ui.theme.*
-import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
@@ -63,7 +64,6 @@ class MainActivity : ComponentActivity() {
         Font(R.font.lexendlight, FontWeight.Light),
         Font(R.font.lexendmedium, FontWeight.Medium)
     )
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -204,7 +204,7 @@ class MainActivity : ComponentActivity() {
             onDismissRequest = ::onDropdownDismissRequest,
             dropDownExpanded = dropDownExpanded.value,
             list = dropDownOptions.value,
-            label = label
+            label = label,
         )
     }
 
@@ -248,7 +248,8 @@ class MainActivity : ComponentActivity() {
                     dismissOnBackPress = true,
                     dismissOnClickOutside = true
                 ),
-                onDismissRequest = onDismissRequest
+                onDismissRequest = onDismissRequest,
+                modifier = Modifier.background(colorResource(R.color.Gray))
             ) {
                 list.forEach { text ->
                     DropdownMenuItem(onClick = {
