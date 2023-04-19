@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
         Font(R.font.lexendlight, FontWeight.Light),
         Font(R.font.lexendmedium, FontWeight.Medium)
     )
-    private var selectedLocation: Location? = null
+    private var selectedLocation by mutableStateOf(Location())
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,13 +64,17 @@ class MainActivity : ComponentActivity() {
         setContent {
             val location by applicationViewModel.getLocationLiveData().observeAsState()
             val locations by viewModel.locations.observeAsState(initial = emptyList())
+            /*val locations = ArrayList<Location>()
+            locations.add(Location(locationName = "Cincinnati"))
+            locations.add(Location(locationName = "Dayton"))
+            locations.add(Location(locationName = "Columbus"))*/
             SunDialTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    TwilightFacts("Android", location, locations, viewModel.selectedLocation)
+                    TwilightFacts(location, locations, selectedLocation)
                     //SearchBar()
                     LogInButton()
                 }
@@ -142,11 +146,9 @@ class MainActivity : ComponentActivity() {
                                     locationName = location.locationName,
                                     locationId = location.locationId
                                 )
-
+                                inLocationName = location.locationName
                             }
-                            locationText = location.toString()
-                            selectedLocation = location
-                            inLocationName = location.locationName
+                            viewModel.selectedLocation = location
                         }) {
                             Text(
                                 text = location.toString(),
@@ -162,7 +164,6 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun TwilightFacts(
-        name: String,
         location: LocationDetails?,
         locations: List<Location> = ArrayList<Location>(),
         selectedLocation: Location = Location()
@@ -170,117 +171,139 @@ class MainActivity : ComponentActivity() {
         var sunrise by remember { mutableStateOf("") }
         var sunset by remember { mutableStateOf("") }
         var locationName by remember { mutableStateOf("") }
-        var locationId by remember { mutableStateOf("") }
         var currentLatitude = location?.latitude
         var currentLongitude = location?.longitude
-        var inLocation by remember { mutableStateOf(selectedLocation.locationName) }
-        var inSunrise by remember { mutableStateOf(selectedLocation.sunrise) }
-        var inSunset by remember { mutableStateOf(selectedLocation.sunset) }
+        var inLocation by remember(selectedLocation.locationId) { mutableStateOf(selectedLocation.locationName) }
+        var inSunrise by remember(selectedLocation.locationId) { mutableStateOf(selectedLocation.sunrise) }
+        var inSunset by remember(selectedLocation.locationId) { mutableStateOf(selectedLocation.sunset) }
+        var inLongitude by remember(selectedLocation.longitude) { mutableStateOf(selectedLocation.longitude) }
+        var inLatitude by remember(selectedLocation.latitude) { mutableStateOf(selectedLocation.latitude) }
         val context = LocalContext.current
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = Champagne),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                LocationSpinner(locations = locations)
-                OutlinedTextField(
-                    value = sunrise,
-                    onValueChange = { sunrise = it },
-                    label = {
-                        Text(
-                            stringResource(R.string.sunrise),
-                            fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Icon(
-                            ImageVector.vectorResource(id = R.drawable.baseline_wb_sunny),
-                            contentDescription = "",
-                            modifier = Modifier.padding(start = 235.dp)
-                        )
-                    }
-                )
-                OutlinedTextField(
-                    value = sunset,
-                    onValueChange = { sunset = it },
-                    label = {
-                        Text(
-                            stringResource(R.string.sunset),
-                            fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Icon(
-                            ImageVector.vectorResource(id = R.drawable.baseline_bedtime),
-                            contentDescription = "",
-                            modifier = Modifier.padding(start = 237.dp)
-                        )
-                    },
 
-                    )
-                OutlinedTextField(
-                    value = locationName,
-                    onValueChange = { locationName = it },
-                    label = {
-                        Text(
-                            stringResource(R.string.LocationName),
-                            fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp, modifier = Modifier.padding(end = 10.dp)
-                        )
-                        Icon(
-                            ImageVector.vectorResource(id = R.drawable.pin_drop),
-                            contentDescription = "",
-                            modifier = Modifier.padding(start = 240.dp)
-                        )
-                    }
-                )
-                GPS(location)
-                Button(
-                    onClick = {
-                        selectedLocation.apply {
-                            locationName = inLocationName
-                            if (currentLatitude != null) {
-                                if (currentLongitude != null) {
-                                    latitude = currentLatitude
-                                    longitude = currentLongitude
-                                }
-                            }
-                            sunrise = inSunrise
-                            sunset = inSunset
-                        }
-                        viewModel.saveLocation()
-                        Toast.makeText(
-                            context,
-                            "$inLocationName $currentLatitude $currentLongitude $inSunrise $inSunset",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            LocationSpinner(locations = locations)
+            OutlinedTextField(
+                value = inSunrise,
+                onValueChange = { inSunrise = it },
+                label = {
                     Text(
-                        text = "Save Location",
-                        color = Color.White,
+                        stringResource(R.string.sunrise),
                         fontFamily = lexendFontFamily,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp, modifier = Modifier.padding(end = 10.dp)
+                    )
+                    Icon(
+                        ImageVector.vectorResource(id = R.drawable.baseline_wb_sunny),
+                        contentDescription = "",
+                        modifier = Modifier.padding(start = 235.dp)
                     )
                 }
+            )
+            OutlinedTextField(
+                value = inSunset,
+                onValueChange = { inSunset = it },
+                label = {
+                    Text(
+                        stringResource(R.string.sunset),
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp, modifier = Modifier.padding(end = 10.dp)
+                    )
+                    Icon(
+                        ImageVector.vectorResource(id = R.drawable.baseline_bedtime),
+                        contentDescription = "",
+                        modifier = Modifier.padding(start = 237.dp)
+                    )
+                },
+
+                )
+            OutlinedTextField(
+                value = inLocation,
+                onValueChange = { inLocation = it },
+                label = {
+                    Text(
+                        stringResource(R.string.LocationName),
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp, modifier = Modifier.padding(end = 10.dp)
+                    )
+                    Icon(
+                        ImageVector.vectorResource(id = R.drawable.pin_drop),
+                        contentDescription = "",
+                        modifier = Modifier.padding(start = 237.dp)
+                    )
+                }
+            )
+            OutlinedTextField(
+                value = inLatitude,
+                onValueChange = { inLatitude = it },
+                label = {
+                    Text(
+                        stringResource(R.string.latitude),
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp, modifier = Modifier.padding(end = 10.dp)
+                    )
+                }
+            )
+            OutlinedTextField(
+                value = inLongitude,
+                onValueChange = { inLongitude = it },
+                label = {
+                    Text(
+                        stringResource(R.string.longitude),
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp, modifier = Modifier.padding(end = 10.dp)
+                    )
+                }
+            )
+            GPS(location)
+            Button(
+                onClick = {
+                    selectedLocation.apply {
+                        locationName = inLocationName
+                        if (currentLatitude != null) {
+                            if (currentLongitude != null) {
+                                latitude = currentLatitude
+                                longitude = currentLongitude
+                            }
+                        }
+                        sunrise = inSunrise
+                        sunset = inSunset
+                    }
+                    viewModel.saveLocation()
+                    Toast.makeText(
+                        context,
+                        "$inLocationName $currentLatitude $currentLongitude $inSunrise $inSunset",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            ) {
+                Text(
+                    text = "Save Location",
+                    color = Color.White,
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
     }
+
 
     @Composable
     private fun GPS(location: LocationDetails?) {
         location?.let {
             Text(
-                text = "Latitude:   " + location.latitude,
+                text = "Current Latitude:   " + location.latitude,
                 fontFamily = lexendFontFamily,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "Longitude:  " + location.longitude,
+                text = "Current Longitude:  " + location.longitude,
                 fontFamily = lexendFontFamily,
                 fontWeight = FontWeight.Bold
             )
@@ -347,7 +370,7 @@ class MainActivity : ComponentActivity() {
         locations.add(Location(locationName = "Away"))
         locations.add(Location(locationName = "Work"))
         SunDialTheme {
-            TwilightFacts("Android", location, locations)
+            TwilightFacts(location, locations)
             LogInButton()
             SearchBar()
         }

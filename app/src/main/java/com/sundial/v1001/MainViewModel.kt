@@ -14,11 +14,8 @@ import com.sundial.v1001.dto.User
 import com.sundial.v1001.service.ITwilightService
 import com.sundial.v1001.service.TwilightService
 import kotlinx.coroutines.launch
-import com.google.firebase.storage.FirebaseStorage
 import com.sundial.v1001.dto.Location
-import com.sundial.v1001.dto.LocationDetails
-import com.sundial.v1001.service.locationService
-import org.koin.core.component.getScopeId
+
 
 class MainViewModel(private var twilightService: ITwilightService = TwilightService()) :
     ViewModel() {
