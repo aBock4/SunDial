@@ -9,22 +9,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
+import com.sundial.v1001.dto.City
 import com.sundial.v1001.dto.Twilight
 import com.sundial.v1001.dto.User
-import com.sundial.v1001.service.ITwilightService
-import com.sundial.v1001.service.TwilightService
 import kotlinx.coroutines.launch
 import com.sundial.v1001.dto.Location
+import com.sundial.v1001.service.ICityService
 
 
-class MainViewModel(private var twilightService: ITwilightService = TwilightService()) :
-    ViewModel() {
+class MainViewModel(var cityService: ICityService) : ViewModel() {
     internal val NEW_LOCATION = "New Location"
     var twilight: MutableLiveData<List<Twilight>> = MutableLiveData<List<Twilight>>()
     var locations: MutableLiveData<List<Location>> = MutableLiveData<List<Location>>()
     var selectedLocation by mutableStateOf(Location())
     var user: User? = null
-    var location: Location? = null
+    var cities : MutableLiveData<List<City>> = MutableLiveData<List<City>>()
 
     private lateinit var firestore: FirebaseFirestore
 
@@ -32,6 +31,12 @@ class MainViewModel(private var twilightService: ITwilightService = TwilightServ
         firestore = FirebaseFirestore.getInstance()
         firestore.firestoreSettings = FirebaseFirestoreSettings.Builder().build()
         listenToLocations()
+    }
+
+    fun fetchCities() {
+        viewModelScope.launch {
+            cityService.fetchCities()
+        }
     }
 
     private fun listenToLocations() {
@@ -58,18 +63,13 @@ class MainViewModel(private var twilightService: ITwilightService = TwilightServ
         }
     }
 
-    fun fetchTwilight() {
+    /*fun fetchTwilight() {
         viewModelScope.launch {
             val innerTwilight = twilightService.fetchTwilight()
             twilight.postValue(innerTwilight)
         }
-    }
-
-    /*fun fetchLocations() {
-        viewModelScope.launch {
-            locationService.fetchLocations()
-        }
     }*/
+
     fun saveLocation() {
         user?.let { user ->
             val document =

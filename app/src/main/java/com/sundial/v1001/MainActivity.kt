@@ -18,23 +18,28 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.PopupProperties
 import androidx.core.content.ContextCompat
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.sundial.v1001.dto.City
 import com.sundial.v1001.dto.Location
 import com.sundial.v1001.dto.LocationDetails
 import com.sundial.v1001.dto.User
@@ -47,7 +52,7 @@ class MainActivity : ComponentActivity() {
     private val viewModel: MainViewModel by viewModel<MainViewModel>()
     private val applicationViewModel: ApplicationViewModel by viewModel<ApplicationViewModel>()
     private var firebaseUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
-    private var user: FirebaseUser? = null
+    private var selectedCity: City? = null
     private var inLocationName: String = ""
     private val lexendFontFamily = FontFamily(
         Font(R.font.lexendregular, FontWeight.Normal),
@@ -62,20 +67,18 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            //viewModel.fetchTwilight()
+            viewModel.fetchCities()
             val location by applicationViewModel.getLocationLiveData().observeAsState()
             val locations by viewModel.locations.observeAsState(initial = emptyList())
-            /*val locations = ArrayList<Location>()
-            locations.add(Location(locationName = "Cincinnati"))
-            locations.add(Location(locationName = "Dayton"))
-            locations.add(Location(locationName = "Columbus"))*/
+            val cities by viewModel.cities.observeAsState(initial = emptyList())
             SunDialTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    TwilightFacts(location, locations, selectedLocation)
-                    //SearchBar()
+                    TwilightFacts(location, locations, selectedLocation, cities)
                     LogInButton()
                 }
             }
@@ -163,14 +166,107 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
+    fun TextFieldWithDropdownUsage(
+        dataIn: List<City>,
+        label: String = "",
+        take: Int = 3,
+        selectedLocation: Location = Location()
+    ) {
+
+        val dropDownOptions = remember { mutableStateOf(listOf<City>()) }
+        val textFieldValue =
+            remember(selectedLocation.locationId) { mutableStateOf(TextFieldValue(selectedLocation.locationName)) }
+        val dropDownExpanded = remember { mutableStateOf(false) }
+
+        fun onDropdownDismissRequest() {
+            dropDownExpanded.value = false
+        }
+
+        fun onValueChanged(value: TextFieldValue) {
+            inLocationName = value.text
+            dropDownExpanded.value = true
+            textFieldValue.value = value
+            dropDownOptions.value = dataIn.filter {
+                it.toString().startsWith(value.text) && it.toString() != value.text
+            }.take(take)
+        }
+
+        TextFieldWithDropdown(
+            value = textFieldValue.value,
+            setValue = ::onValueChanged,
+            onDismissRequest = ::onDropdownDismissRequest,
+            dropDownExpanded = dropDownExpanded.value,
+            list = dropDownOptions.value,
+            label = label
+        )
+    }
+
+    @Composable
+    fun TextFieldWithDropdown(
+        value: TextFieldValue,
+        setValue: (TextFieldValue) -> Unit,
+        onDismissRequest: () -> Unit,
+        dropDownExpanded: Boolean,
+        list: List<City>,
+        label: String = ""
+    ) {
+        Box() {
+            OutlinedTextField(
+                modifier = Modifier
+                    .onFocusChanged { focusState ->
+                        if (!focusState.isFocused)
+                            onDismissRequest()
+                    },
+                value = value,
+                onValueChange = setValue,
+                label = {
+                    Text(
+                        label,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp, modifier = Modifier.padding(end = 10.dp)
+                    )
+                    Icon(
+                        ImageVector.vectorResource(id = R.drawable.pin_drop),
+                        contentDescription = "",
+                        modifier = Modifier.padding(start = 237.dp)
+                    )
+                },
+                colors = TextFieldDefaults.outlinedTextFieldColors()
+            )
+            DropdownMenu(
+                expanded = dropDownExpanded,
+                properties = PopupProperties(
+                    focusable = false,
+                    dismissOnBackPress = true,
+                    dismissOnClickOutside = true
+                ),
+                onDismissRequest = onDismissRequest
+            ) {
+                list.forEach { text ->
+                    DropdownMenuItem(onClick = {
+                        setValue(
+                            TextFieldValue(
+                                text.toString(),
+                                TextRange(text.toString().length)
+                            )
+                        )
+                        selectedCity = text
+                    }) {
+                        Text(text = text.toString())
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
     fun TwilightFacts(
         location: LocationDetails?,
         locations: List<Location> = ArrayList<Location>(),
-        selectedLocation: Location = Location()
+        selectedLocation: Location = Location(),
+        cities: List<City> = ArrayList<City>()
     ) {
-        var sunrise by remember { mutableStateOf("") }
-        var sunset by remember { mutableStateOf("") }
-        var locationName by remember { mutableStateOf("") }
         var currentLatitude = location?.latitude
         var currentLongitude = location?.longitude
         var inLocation by remember(selectedLocation.locationId) { mutableStateOf(selectedLocation.locationName) }
@@ -185,6 +281,7 @@ class MainActivity : ComponentActivity() {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             LocationSpinner(locations = locations)
+            TextFieldWithDropdownUsage(dataIn = cities, stringResource(R.string.LocationName))
             OutlinedTextField(
                 value = inSunrise,
                 onValueChange = { inSunrise = it },
@@ -220,7 +317,7 @@ class MainActivity : ComponentActivity() {
                 },
 
                 )
-            OutlinedTextField(
+            /*OutlinedTextField(
                 value = inLocation,
                 onValueChange = { inLocation = it },
                 label = {
@@ -236,7 +333,7 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(start = 237.dp)
                     )
                 }
-            )
+            )*/
             OutlinedTextField(
                 value = inLatitude,
                 onValueChange = { inLatitude = it },
@@ -246,6 +343,11 @@ class MainActivity : ComponentActivity() {
                         fontFamily = lexendFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp, modifier = Modifier.padding(end = 10.dp)
+                    )
+                    Icon(
+                        ImageVector.vectorResource(id = R.drawable.baseline_public_24),
+                        contentDescription = "",
+                        modifier = Modifier.padding(start = 237.dp)
                     )
                 }
             )
@@ -259,21 +361,29 @@ class MainActivity : ComponentActivity() {
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp, modifier = Modifier.padding(end = 10.dp)
                     )
+                    Icon(
+                        ImageVector.vectorResource(id = R.drawable.baseline_public_24),
+                        contentDescription = "",
+                        modifier = Modifier.padding(start = 237.dp)
+                    )
                 }
             )
             GPS(location)
             Button(
                 onClick = {
                     selectedLocation.apply {
-                        locationName = inLocationName
+                        sunrise = inSunrise
+                        sunset = inSunset
+                        locationName = selectedCity?.let {
+                            it.cityName
+                        } ?: ""
+                        inLocationName = locationName
                         if (currentLatitude != null) {
                             if (currentLongitude != null) {
                                 latitude = currentLatitude
                                 longitude = currentLongitude
                             }
                         }
-                        sunrise = inSunrise
-                        sunset = inSunset
                     }
                     viewModel.saveLocation()
                     Toast.makeText(
@@ -311,39 +421,6 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun SearchBar() {
-        var text by remember { mutableStateOf("") }
-        val lexendFontFamily = FontFamily(Font(R.font.lexendbold, FontWeight.Bold))
-        Surface(
-            elevation = 4.dp
-        ) {
-            Row(
-                modifier = Modifier
-                    .background(color = Orange)
-                    .fillMaxWidth()
-                    .padding(16.dp)
-
-            ) {
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    label = {
-                        Text(
-                            text = "Search Location",
-                            fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Bold
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-
-                )
-            }
-        }
-    }
-
-
-    @Composable
     fun LogInButton() {
         val lexendFontFamily = FontFamily(Font(R.font.lexendmedium, FontWeight.Medium))
         Box(
@@ -372,7 +449,6 @@ class MainActivity : ComponentActivity() {
         SunDialTheme {
             TwilightFacts(location, locations)
             LogInButton()
-            SearchBar()
         }
     }
 
