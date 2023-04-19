@@ -9,37 +9,27 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.sundial.v1001.dto.City
-import com.sundial.v1001.dto.Twilight
 import com.sundial.v1001.dto.User
 import kotlinx.coroutines.launch
 import com.sundial.v1001.dto.Location
 import com.sundial.v1001.service.ICityService
 
 
-class MainViewModel(private var cityService: ICityService) : ViewModel() {
+class MainViewModel(var cityService: ICityService) : ViewModel() {
     internal val NEW_LOCATION = "New Location"
-    var twilight: MutableLiveData<List<Twilight>> = MutableLiveData<List<Twilight>>()
+    var cities = cityService.getLocalCityDAO().getAllCities()
     var locations: MutableLiveData<List<Location>> = MutableLiveData<List<Location>>()
     var selectedLocation by mutableStateOf(Location())
     var user: User? = null
-    var cities : MutableLiveData<List<City>> = MutableLiveData<List<City>>()
 
     private lateinit var firestore: FirebaseFirestore
 
     init {
         firestore = FirebaseFirestore.getInstance()
         firestore.firestoreSettings = FirebaseFirestoreSettings.Builder().build()
-        listenToLocations()
     }
 
-    fun fetchCities() {
-        viewModelScope.launch {
-            cityService.fetchCities()
-        }
-    }
-
-    private fun listenToLocations() {
+    fun listenToLocations() {
         user?.let { user ->
             firestore.collection("users").document(user.uid).collection("locations")
                 .addSnapshotListener { snapshot, e ->
@@ -49,7 +39,7 @@ class MainViewModel(private var cityService: ICityService) : ViewModel() {
                     }
                     snapshot?.let {
                         val allLocations = ArrayList<Location>()
-                        allLocations.add(Location(locationName = NEW_LOCATION))
+                        allLocations.add(Location(longitude= "", locationName = NEW_LOCATION, latitude = "", sunrise = "", sunset = ""))
                         val documents = snapshot.documents
                         documents.forEach {
                             val location = it.toObject(Location::class.java)
@@ -63,27 +53,34 @@ class MainViewModel(private var cityService: ICityService) : ViewModel() {
         }
     }
 
-    /*fun fetchTwilight() {
+    fun fetchCities() {
         viewModelScope.launch {
-            val innerTwilight = twilightService.fetchTwilight()
-            twilight.postValue(innerTwilight)
+            cityService.fetchCities()
         }
-    }*/
+    }
 
     fun saveLocation() {
         user?.let { user ->
             val document =
                 if (selectedLocation.locationId == null || selectedLocation.locationId.isEmpty()) {
-                    firestore.collection("users").document(user.uid).collection("locations")
-                        .document()
+                    firestore.collection("users").document(user.uid).collection("locations").document()
                 } else {
-                    firestore.collection("users").document(user.uid).collection("locations")
-                        .document(selectedLocation.locationId)
+                    firestore.collection("users").document(user.uid).collection("locations").document(selectedLocation.locationId)
                 }
             selectedLocation.locationId = document.id
             val handle = document.set(selectedLocation)
             handle.addOnSuccessListener { Log.d("Firebase", "Location Saved") }
             handle.addOnFailureListener { Log.e("Firebase", "Save failed $it") }
+        }
+    }
+
+    fun deleteLocation(location: Location) {
+        user?.let { user ->
+            var locationCollection =
+                firestore.collection("users").document(user.uid).collection("locations")
+            locationCollection.document(selectedLocation.locationId).delete()
+                .addOnSuccessListener { Log.d("Firebase", "Location Deleted") }
+                .addOnFailureListener { Log.e("Firebase", "Delete failed $location") }
         }
     }
 

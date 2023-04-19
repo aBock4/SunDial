@@ -28,7 +28,7 @@ class CityTests {
     }
 
     private fun givenCityServiceIsInitialized() {
-        cityService = CityService()
+        cityService = CityService(androidApplication())
     }
 
     private suspend fun whenCityDataIsReadAndParsed() {

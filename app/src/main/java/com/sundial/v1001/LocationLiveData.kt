@@ -7,11 +7,8 @@ import android.location.Location
 import android.os.Looper
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LiveData
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
 import com.sundial.v1001.dto.LocationDetails
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
 
 class LocationLiveData(var context: Context) : LiveData<LocationDetails>() {
 
@@ -92,7 +89,7 @@ class LocationLiveData(var context: Context) : LiveData<LocationDetails>() {
         val locationRequest : LocationRequest = LocationRequest.create().apply {
             interval = ONE_MINUTE
             fastestInterval = ONE_MINUTE/4
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            priority = Priority.PRIORITY_HIGH_ACCURACY
 
         }
     }
