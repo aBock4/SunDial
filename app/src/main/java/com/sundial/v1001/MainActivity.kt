@@ -371,7 +371,7 @@ class MainActivity : ComponentActivity() {
                     Column(
                         modifier = Modifier
                             .padding(end = 10.dp)
-                            .padding(top = 10.dp)
+                            .padding(top = 15.dp)
                     ) {
                         Button(
                             onClick = {
@@ -413,7 +413,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                     }
-                    Column(modifier = Modifier.padding(top = 10.dp)) {
+                    Column(modifier = Modifier.padding(top = 15.dp)) {
                         Button(
                             onClick = {
                                 if (firebaseUser != null && firebaseUser.toString().isNotEmpty()) {
@@ -472,9 +472,15 @@ class MainActivity : ComponentActivity() {
                     }
                 },
                 modifier = Modifier
-                    .padding(16.dp)
+                    .align(Alignment.BottomStart)
+                    .padding(10.dp)
             ) {
-                Text(text = "Open Weather App")
+                Text(
+                    text = "Open Weather App",
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
             }
         }
     }
