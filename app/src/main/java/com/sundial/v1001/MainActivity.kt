@@ -89,7 +89,10 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     LocationFacts(cities, locations, viewModel.selectedLocation, location)
-                    LinkButton("https://support.google.com/maps/answer/18539?hl=en&co=GENIE.Platform%3DDesktop", "How do I use Coordinates?")
+                    LinkButton(
+                        "https://support.google.com/maps/answer/18539?hl=en&co=GENIE.Platform%3DDesktop",
+                        "How do I use Coordinates?"
+                    )
                     LogInButton()
                     WeatherAppButton()
                 }
@@ -482,8 +485,8 @@ class MainActivity : ComponentActivity() {
     }
 
 
-    private @Composable
-    fun GPS(location: LocationDetails?) {
+    @Composable
+    private fun GPS(location: LocationDetails?) {
         location?.let {
             Column(modifier = Modifier.padding(bottom = 5.dp)) {
                 Text(
@@ -499,120 +502,120 @@ class MainActivity : ComponentActivity() {
                     fontFamily = lexendFontFamily,
                     fontWeight = FontWeight.Normal,
                     fontSize = 16.sp
-                            Text (text = location.latitude)
-                            Text (text = location.longitude)
                 )
+                Text(text = location.latitude)
+                Text(text = location.longitude)
             }
         }
     }
 
-        @Composable
-        fun LinkButton(linkText: String, buttonText: String) {
-            val context = LocalContext.current
+    @Composable
+    fun LinkButton(linkText: String, buttonText: String) {
+        val context = LocalContext.current
 
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.BottomStart
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomStart
+        ) {
+            Button(
+                onClick = {
+                    val uri = Uri.parse(linkText)
+                    val intent = Intent(Intent.ACTION_VIEW, uri)
+                    context.startActivity(intent)
+                },
+                modifier = Modifier.padding(16.dp)
             ) {
-                Button(
-                    onClick = {
-                        val uri = Uri.parse(linkText)
-                        val intent = Intent(Intent.ACTION_VIEW, uri)
-                        context.startActivity(intent)
-                    },
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(text = buttonText)
-                }
+                Text(text = buttonText)
             }
         }
+    }
 
 
-        @Composable
-        fun LogInButton() {
-            Box(
+    @Composable
+    fun LogInButton() {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Button(
+                onClick = { signIn() },
                 modifier = Modifier
-                    .fillMaxSize()
+                    .align(Alignment.BottomEnd)
+                    .padding(10.dp)
             ) {
-                Button(
-                    onClick = { signIn() },
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(10.dp)
-                ) {
-                    Text(
-                        text = "Log in",
-                        fontFamily = lexendFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
+                Text(
+                    text = "Log in",
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
 
-                }
-            }
-        }
-
-
-        @Preview(name = "Light Mode", showBackground = true)
-        @Preview(
-            uiMode = Configuration.UI_MODE_NIGHT_YES,
-            showBackground = true,
-            name = "Dark Mode"
-        )
-        @Composable
-        fun DefaultPreview() {
-            val cities by viewModel.cities.observeAsState(initial = emptyList())
-            val location by applicationViewModel.getLocationLiveData().observeAsState()
-            val locations = ArrayList<Location>()
-            locations.add(Location(locationName = "Home"))
-            locations.add(Location(locationName = "Away"))
-            locations.add(Location(locationName = "Work"))
-            SunDialTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
-                ) {
-                    LocationFacts(cities, locations, viewModel.selectedLocation, location)
-                    LogInButton()
-                }
-            }
-        }
-
-        private fun signIn() {
-            val providers = arrayListOf(
-                AuthUI.IdpConfig.EmailBuilder().build(),
-                AuthUI.IdpConfig.GoogleBuilder().build()
-            )
-            val signinIntent = AuthUI.getInstance()
-                .createSignInIntentBuilder()
-                .setAvailableProviders(providers)
-                .build()
-
-            signInLauncher.launch(signinIntent)
-        }
-
-        private val signInLauncher = registerForActivityResult(
-            FirebaseAuthUIActivityResultContract()
-        ) { res ->
-            this.signInResult(res)
-        }
-
-        private fun signInResult(result: FirebaseAuthUIAuthenticationResult) {
-            val response = result.idpResponse
-            if (result.resultCode == RESULT_OK) {
-                firebaseUser = FirebaseAuth.getInstance().currentUser
-                firebaseUser?.let {
-                    val user = User(it.uid, it.displayName)
-                    viewModel.user = user
-                    viewModel.saveUser()
-                    Toast.makeText(
-                        this,
-                        "Welcome, ${viewModel.user!!.displayName}",
-                        Toast.LENGTH_LONG
-                    )
-                        .show()
-                }
-            } else {
-                Log.e("MainActivity.kt", "Error logging in " + response?.error?.errorCode)
             }
         }
     }
+
+
+    @Preview(name = "Light Mode", showBackground = true)
+    @Preview(
+        uiMode = Configuration.UI_MODE_NIGHT_YES,
+        showBackground = true,
+        name = "Dark Mode"
+    )
+    @Composable
+    fun DefaultPreview() {
+        val cities by viewModel.cities.observeAsState(initial = emptyList())
+        val location by applicationViewModel.getLocationLiveData().observeAsState()
+        val locations = ArrayList<Location>()
+        locations.add(Location(locationName = "Home"))
+        locations.add(Location(locationName = "Away"))
+        locations.add(Location(locationName = "Work"))
+        SunDialTheme {
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colors.background
+            ) {
+                LocationFacts(cities, locations, viewModel.selectedLocation, location)
+                LogInButton()
+            }
+        }
+    }
+
+    private fun signIn() {
+        val providers = arrayListOf(
+            AuthUI.IdpConfig.EmailBuilder().build(),
+            AuthUI.IdpConfig.GoogleBuilder().build()
+        )
+        val signinIntent = AuthUI.getInstance()
+            .createSignInIntentBuilder()
+            .setAvailableProviders(providers)
+            .build()
+
+        signInLauncher.launch(signinIntent)
+    }
+
+    private val signInLauncher = registerForActivityResult(
+        FirebaseAuthUIActivityResultContract()
+    ) { res ->
+        this.signInResult(res)
+    }
+
+    private fun signInResult(result: FirebaseAuthUIAuthenticationResult) {
+        val response = result.idpResponse
+        if (result.resultCode == RESULT_OK) {
+            firebaseUser = FirebaseAuth.getInstance().currentUser
+            firebaseUser?.let {
+                val user = User(it.uid, it.displayName)
+                viewModel.user = user
+                viewModel.saveUser()
+                Toast.makeText(
+                    this,
+                    "Welcome, ${viewModel.user!!.displayName}",
+                    Toast.LENGTH_LONG
+                )
+                    .show()
+            }
+        } else {
+            Log.e("MainActivity.kt", "Error logging in " + response?.error?.errorCode)
+        }
+    }
+}
