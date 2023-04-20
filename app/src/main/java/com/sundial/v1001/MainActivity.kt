@@ -89,7 +89,6 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     LocationFacts(cities, locations, viewModel.selectedLocation, location)
-                    LinkButton("https://support.google.com/maps/answer/18539?hl=en&co=GENIE.Platform%3DDesktop", "How do I use Coordinates?")
                     LogInButton()
                     WeatherAppButton()
                 }
@@ -378,8 +377,7 @@ class MainActivity : ComponentActivity() {
                         Button(
                             onClick = {
                                 // Check to see if we have a valid user
-                                if (firebaseUser != null && firebaseUser.toString().isNotEmpty())
-                                {
+                                if (firebaseUser != null && firebaseUser.toString().isNotEmpty()) {
                                     selectedLocation.apply {
                                         sunrise = inSunrise
                                         sunset = inSunset
@@ -394,9 +392,12 @@ class MainActivity : ComponentActivity() {
                                         "$inLocationName $inSunrise $inSunset",
                                         Toast.LENGTH_LONG
                                     ).show()
-                                } else
-                                {
-                                    Toast.makeText(context, "Please Log In to Save a Location", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Please Log In to Save a Location",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             }
                         ) {
@@ -416,18 +417,22 @@ class MainActivity : ComponentActivity() {
                     Column(modifier = Modifier.padding(top = 10.dp)) {
                         Button(
                             onClick = {
-                                if (firebaseUser != null && firebaseUser.toString().isNotEmpty())
-                                {
-                                    if(selectedLocation.locationName.isEmpty() || selectedLocation.locationName == ""){
-                                        Toast.makeText(context, "You cannot delete an unsaved location. Please save the location and try again.", Toast.LENGTH_LONG).show()
-                                    } else
-                                    {
+                                if (firebaseUser != null && firebaseUser.toString().isNotEmpty()) {
+                                    if (selectedLocation.locationName.isEmpty() || selectedLocation.locationName == "") {
+                                        Toast.makeText(
+                                            context,
+                                            "You cannot delete an unsaved location. Please save the location and try again.",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    } else {
                                         viewModel.deleteLocation(selectedLocation)
                                     }
-                                }
-                                else
-                                {
-                                    Toast.makeText(context, "Please Log In to Delete a Location", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Please Log In to Delete a Location",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             }
                         ) {
@@ -448,6 +453,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
     @Composable
     fun WeatherAppButton() {
         val context = LocalContext.current
@@ -492,110 +498,120 @@ class MainActivity : ComponentActivity() {
                     fontFamily = lexendFontFamily,
                     fontWeight = FontWeight.Normal,
                     fontSize = 16.sp
-            Text(text = location.latitude)
-            Text(text = location.longitude)
-        }
-    }
-
-    @Composable
-    fun LinkButton(linkText: String, buttonText: String) {
-        val context = LocalContext.current
-
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomStart
-        ) {
-            Button(
-                onClick = {
-                    val uri = Uri.parse(linkText)
-                    val intent = Intent(Intent.ACTION_VIEW, uri)
-                    context.startActivity(intent)
-                },
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(text = buttonText)
-            }
-        }
-    }
-
-
-    @Composable
-    fun LogInButton() {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            Button(
-                onClick = { signIn() },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(10.dp)
-            ) {
-                Text(
-                    text = "Log in",
-                    fontFamily = lexendFontFamily,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                            Text (text = location.latitude)
+                            Text (text = location.longitude)
                 )
-
             }
         }
     }
 
+        @Composable
+        fun LinkButton(linkText: String, buttonText: String) {
+            val context = LocalContext.current
 
-    @Preview(name = "Light Mode", showBackground = true)
-    @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true, name = "Dark Mode")
-    @Composable
-    fun DefaultPreview() {
-        val cities by viewModel.cities.observeAsState(initial = emptyList())
-        val location by applicationViewModel.getLocationLiveData().observeAsState()
-        val locations = ArrayList<Location>()
-        locations.add(Location(locationName = "Home"))
-        locations.add(Location(locationName = "Away"))
-        locations.add(Location(locationName = "Work"))
-        SunDialTheme {
-            Surface(
+            Box(
                 modifier = Modifier.fillMaxSize(),
-                color = MaterialTheme.colors.background
+                contentAlignment = Alignment.BottomStart
             ) {
-                LocationFacts(cities, locations, viewModel.selectedLocation, location)
-                LogInButton()
+                Button(
+                    onClick = {
+                        val uri = Uri.parse(linkText)
+                        val intent = Intent(Intent.ACTION_VIEW, uri)
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(text = buttonText)
+                }
             }
         }
-    }
 
-    private fun signIn() {
-        val providers = arrayListOf(
-            AuthUI.IdpConfig.EmailBuilder().build(),
-            AuthUI.IdpConfig.GoogleBuilder().build()
+
+        @Composable
+        fun LogInButton() {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                Button(
+                    onClick = { signIn() },
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(10.dp)
+                ) {
+                    Text(
+                        text = "Log in",
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+
+                }
+            }
+        }
+
+
+        @Preview(name = "Light Mode", showBackground = true)
+        @Preview(
+            uiMode = Configuration.UI_MODE_NIGHT_YES,
+            showBackground = true,
+            name = "Dark Mode"
         )
-        val signinIntent = AuthUI.getInstance()
-            .createSignInIntentBuilder()
-            .setAvailableProviders(providers)
-            .build()
-
-        signInLauncher.launch(signinIntent)
-    }
-
-    private val signInLauncher = registerForActivityResult(
-        FirebaseAuthUIActivityResultContract()
-    ) { res ->
-        this.signInResult(res)
-    }
-
-    private fun signInResult(result: FirebaseAuthUIAuthenticationResult) {
-        val response = result.idpResponse
-        if (result.resultCode == RESULT_OK) {
-            firebaseUser = FirebaseAuth.getInstance().currentUser
-            firebaseUser?.let {
-                val user = User(it.uid, it.displayName)
-                viewModel.user = user
-                viewModel.saveUser()
-                Toast.makeText(this, "Welcome, ${viewModel.user!!.displayName}", Toast.LENGTH_LONG)
-                    .show()
+        @Composable
+        fun DefaultPreview() {
+            val cities by viewModel.cities.observeAsState(initial = emptyList())
+            val location by applicationViewModel.getLocationLiveData().observeAsState()
+            val locations = ArrayList<Location>()
+            locations.add(Location(locationName = "Home"))
+            locations.add(Location(locationName = "Away"))
+            locations.add(Location(locationName = "Work"))
+            SunDialTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colors.background
+                ) {
+                    LocationFacts(cities, locations, viewModel.selectedLocation, location)
+                    LogInButton()
+                }
             }
-        } else {
-            Log.e("MainActivity.kt", "Error logging in " + response?.error?.errorCode)
+        }
+
+        private fun signIn() {
+            val providers = arrayListOf(
+                AuthUI.IdpConfig.EmailBuilder().build(),
+                AuthUI.IdpConfig.GoogleBuilder().build()
+            )
+            val signinIntent = AuthUI.getInstance()
+                .createSignInIntentBuilder()
+                .setAvailableProviders(providers)
+                .build()
+
+            signInLauncher.launch(signinIntent)
+        }
+
+        private val signInLauncher = registerForActivityResult(
+            FirebaseAuthUIActivityResultContract()
+        ) { res ->
+            this.signInResult(res)
+        }
+
+        private fun signInResult(result: FirebaseAuthUIAuthenticationResult) {
+            val response = result.idpResponse
+            if (result.resultCode == RESULT_OK) {
+                firebaseUser = FirebaseAuth.getInstance().currentUser
+                firebaseUser?.let {
+                    val user = User(it.uid, it.displayName)
+                    viewModel.user = user
+                    viewModel.saveUser()
+                    Toast.makeText(
+                        this,
+                        "Welcome, ${viewModel.user!!.displayName}",
+                        Toast.LENGTH_LONG
+                    )
+                        .show()
+                }
+            } else {
+                Log.e("MainActivity.kt", "Error logging in " + response?.error?.errorCode)
+            }
         }
     }
-}
