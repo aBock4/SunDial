@@ -149,11 +149,11 @@ class MainActivity : ComponentActivity() {
                         DropdownMenuItem(onClick = {
                             expanded = false
                             if (location.locationName == viewModel.newLocation) {
-                                // New Location
+// New Location
                                 locationText = viewModel.newLocation
                                 location.locationName = ""
                             } else {
-                                // Existing Location
+// Existing Location
                                 locationText = location.toString()
                                 selectedCity = City(
                                     country = "",
@@ -175,7 +175,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
     @Composable
     fun TextFieldWithDropdownUsage(
         dataIn: List<City>,
@@ -460,7 +459,7 @@ class MainActivity : ComponentActivity() {
 
         Box(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.TopStart
+            contentAlignment = Alignment.BottomStart
         ) {
             Button(
                 onClick = {
@@ -502,28 +501,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
-    @Composable
-    fun LinkButton(linkText: String, buttonText: String) {
-        val context = LocalContext.current
-
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.BottomStart
-        ) {
-            Button(
-                onClick = {
-                    val uri = Uri.parse(linkText)
-                    val intent = Intent(Intent.ACTION_VIEW, uri)
-                    context.startActivity(intent)
-                },
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text(text = buttonText)
-            }
-        }
-    }
-
 
     @Composable
     fun LogInButton() {
