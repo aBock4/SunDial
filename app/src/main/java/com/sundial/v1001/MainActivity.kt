@@ -151,7 +151,7 @@ class MainActivity : ComponentActivity() {
                             if (location.locationName == viewModel.newLocation) {
 // New Location
                                 locationText = viewModel.newLocation
-                                location.locationName = ""
+                                location.locationName = "New Location"
                             } else {
 // Existing Location
                                 locationText = location.toString()
