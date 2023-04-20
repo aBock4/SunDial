@@ -7,7 +7,7 @@ object RetrofitClientInstance {
     private var retrofit: Retrofit? = null
     private const val BASE_URL = "https://api.sunrise-sunset.org/"
 
-    val retrofitInstance : Retrofit?
+    val retrofitInstance: Retrofit?
         get() {
             // has this object been created yet?
             if (retrofit == null) {

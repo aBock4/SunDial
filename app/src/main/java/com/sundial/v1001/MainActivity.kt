@@ -133,7 +133,7 @@ class MainActivity : ComponentActivity() {
             ) {
                 Text(
                     text = locationText,
-                    fontSize = 24.sp,
+                    fontSize = 20.sp,
                     modifier = Modifier.padding(end = 8.dp),
                     fontFamily = lexendFontFamily,
                     fontWeight = FontWeight.Bold
@@ -143,10 +143,9 @@ class MainActivity : ComponentActivity() {
                     locations.forEach { location ->
                         DropdownMenuItem(onClick = {
                             expanded = false
-
-                            if (location.locationName == viewModel.NEW_LOCATION) {
+                            if (location.locationName == viewModel.newLocation) {
                                 // New Location
-                                locationText = ""
+                                locationText = viewModel.newLocation
                                 location.locationName = ""
                             } else {
                                 // Existing Location
@@ -280,7 +279,7 @@ class MainActivity : ComponentActivity() {
         var inLongitude by remember(selectedLocation.longitude) { mutableStateOf(selectedLocation.longitude) }
         var inLatitude by remember(selectedLocation.latitude) { mutableStateOf(selectedLocation.latitude) }
         val context = LocalContext.current
-        Box() {
+        Box {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -365,29 +364,34 @@ class MainActivity : ComponentActivity() {
                     }
                 )
                 Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center) {
-                    Column(modifier = Modifier
-                        .padding(end = 10.dp)
-                        .padding(top = 10.dp)) {
+                    Column(
+                        modifier = Modifier
+                            .padding(end = 10.dp)
+                            .padding(top = 10.dp)
+                    ) {
                         Button(
                             onClick = {
-                                selectedLocation.apply {
-                                    sunrise = inSunrise
-                                    sunset = inSunset
-                                    cityId = selectedCity?.let {
-                                        it.id
-                                    } ?: 0
-                                    locationName = inLocationName
-                                    currentLocation?.let { currentLocation ->
-                                        latitude = currentLocation.latitude
-                                        longitude = currentLocation.longitude
+                                // Check to see if we have a valid user
+                                if (firebaseUser != null && firebaseUser.toString().isNotEmpty())
+                                {
+                                    selectedLocation.apply {
+                                        sunrise = inSunrise
+                                        sunset = inSunset
+                                        cityId = selectedCity?.id ?: 0
+                                        locationName = inLocationName
+                                        longitude = inLongitude
+                                        latitude = inLatitude
                                     }
+                                    viewModel.saveLocation()
+                                    Toast.makeText(
+                                        context,
+                                        "$inLocationName $inSunrise $inSunset",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                } else
+                                {
+                                    Toast.makeText(context, "Please Log In to Save a Location", Toast.LENGTH_SHORT).show()
                                 }
-                                viewModel.saveLocation()
-                                Toast.makeText(
-                                    context,
-                                    "$inLocationName $inSunrise $inSunset",
-                                    Toast.LENGTH_LONG
-                                ).show()
                             }
                         ) {
                             Text(
@@ -406,7 +410,19 @@ class MainActivity : ComponentActivity() {
                     Column(modifier = Modifier.padding(top = 10.dp)) {
                         Button(
                             onClick = {
-                                viewModel.deleteLocation(selectedLocation)
+                                if (firebaseUser != null && firebaseUser.toString().isNotEmpty())
+                                {
+                                    if(selectedLocation.locationName.isEmpty() || selectedLocation.locationName == ""){
+                                        Toast.makeText(context, "You cannot delete an unsaved location. Please save the location and try again.", Toast.LENGTH_LONG).show()
+                                    } else
+                                    {
+                                        viewModel.deleteLocation(selectedLocation)
+                                    }
+                                }
+                                else
+                                {
+                                    Toast.makeText(context, "Please Log In to Delete a Location", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         ) {
                             Text(
@@ -426,7 +442,6 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
 
     @Composable
     private fun GPS(location: LocationDetails?) {
@@ -462,7 +477,12 @@ class MainActivity : ComponentActivity() {
                     .align(Alignment.BottomEnd)
                     .padding(10.dp)
             ) {
-                Text(text = "Log in", fontFamily = lexendFontFamily, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(
+                    text = "Log in",
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
 
             }
         }

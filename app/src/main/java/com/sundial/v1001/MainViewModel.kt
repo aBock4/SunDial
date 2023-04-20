@@ -15,17 +15,16 @@ import com.sundial.v1001.dto.Location
 import com.sundial.v1001.service.ICityService
 
 
-class MainViewModel(var cityService: ICityService) : ViewModel() {
-    internal val NEW_LOCATION = "New Location"
+class MainViewModel(private var cityService: ICityService) : ViewModel() {
+    val newLocation = "New Location"
     var cities = cityService.getLocalCityDAO().getAllCities()
     var locations: MutableLiveData<List<Location>> = MutableLiveData<List<Location>>()
     var selectedLocation by mutableStateOf(Location())
     var user: User? = null
 
-    private lateinit var firestore: FirebaseFirestore
+    private var firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     init {
-        firestore = FirebaseFirestore.getInstance()
         firestore.firestoreSettings = FirebaseFirestoreSettings.Builder().build()
     }
 
@@ -39,12 +38,20 @@ class MainViewModel(var cityService: ICityService) : ViewModel() {
                     }
                     snapshot?.let {
                         val allLocations = ArrayList<Location>()
-                        allLocations.add(Location(longitude= "", locationName = NEW_LOCATION, latitude = "", sunrise = "", sunset = ""))
+                        allLocations.add(
+                            Location(
+                                longitude = "",
+                                locationName = newLocation,
+                                latitude = "",
+                                sunrise = "",
+                                sunset = ""
+                            )
+                        )
                         val documents = snapshot.documents
-                        documents.forEach {
-                            val location = it.toObject(Location::class.java)
-                            location?.let {
-                                allLocations.add(it)
+                        documents.forEach { document ->
+                            val location = document.toObject(Location::class.java)
+                            location?.let { loca ->
+                                allLocations.add(loca)
                             }
                         }
                         locations.value = allLocations
@@ -62,10 +69,12 @@ class MainViewModel(var cityService: ICityService) : ViewModel() {
     fun saveLocation() {
         user?.let { user ->
             val document =
-                if (selectedLocation.locationId == null || selectedLocation.locationId.isEmpty()) {
-                    firestore.collection("users").document(user.uid).collection("locations").document()
+                if (selectedLocation.locationId.isEmpty()) {
+                    firestore.collection("users").document(user.uid).collection("locations")
+                        .document()
                 } else {
-                    firestore.collection("users").document(user.uid).collection("locations").document(selectedLocation.locationId)
+                    firestore.collection("users").document(user.uid).collection("locations")
+                        .document(selectedLocation.locationId)
                 }
             selectedLocation.locationId = document.id
             val handle = document.set(selectedLocation)
@@ -76,12 +85,14 @@ class MainViewModel(var cityService: ICityService) : ViewModel() {
 
     fun deleteLocation(location: Location) {
         user?.let { user ->
-            var locationCollection =
+            val locationCollection =
                 firestore.collection("users").document(user.uid).collection("locations")
             locationCollection.document(selectedLocation.locationId).delete()
                 .addOnSuccessListener { Log.d("Firebase", "Location Deleted") }
                 .addOnFailureListener { Log.e("Firebase", "Delete failed $location") }
         }
+        val blankLocation = Location()
+        selectedLocation = blankLocation
     }
 
     fun saveUser() {

@@ -8,11 +8,11 @@ import com.sundial.v1001.dto.City
 interface ILocalCityDAO {
 
     @Query("SELECT * FROM cities")
-    fun getAllCities() : LiveData<List<City>>
+    fun getAllCities(): LiveData<List<City>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertAll(cities: ArrayList<City>)
 
     @Delete
-    fun delete(city : City)
+    fun delete(city: City)
 }
