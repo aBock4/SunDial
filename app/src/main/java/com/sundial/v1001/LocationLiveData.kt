@@ -7,13 +7,11 @@ import android.location.Location
 import android.os.Looper
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LiveData
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
 import com.sundial.v1001.dto.LocationDetails
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
 
-class LocationLiveData(var context: Context) : LiveData<LocationDetails>() {
+@Suppress("DEPRECATION", "NAME_SHADOWING")
+class LocationLiveData(private var context: Context) : LiveData<LocationDetails>() {
 
     private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
 
@@ -36,8 +34,8 @@ class LocationLiveData(var context: Context) : LiveData<LocationDetails>() {
             // for ActivityCompat#requestPermissions for more details.
             return
         }
-        fusedLocationClient.lastLocation.addOnSuccessListener {
-            location -> location.also {
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            location.also {
                 setLocationData(it)
             }
         }
@@ -62,12 +60,15 @@ class LocationLiveData(var context: Context) : LiveData<LocationDetails>() {
             // for ActivityCompat#requestPermissions for more details.
             return
         }
-        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+        fusedLocationClient.requestLocationUpdates(
+            locationRequest,
+            locationCallback,
+            Looper.getMainLooper()
+        )
     }
 
     private fun setLocationData(location: Location?) {
-        location?.let {
-            location ->
+        location?.let { location ->
             value = LocationDetails(location.longitude.toString(), location.latitude.toString())
         }
     }
@@ -80,7 +81,6 @@ class LocationLiveData(var context: Context) : LiveData<LocationDetails>() {
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             super.onLocationResult(locationResult)
-            locationResult ?: return
             for (location in locationResult.locations) {
                 setLocationData(location)
             }
@@ -88,11 +88,11 @@ class LocationLiveData(var context: Context) : LiveData<LocationDetails>() {
     }
 
     companion object {
-        val ONE_MINUTE : Long = 60000
-        val locationRequest : LocationRequest = LocationRequest.create().apply {
+        private const val ONE_MINUTE: Long = 60000
+        val locationRequest: LocationRequest = LocationRequest.create().apply {
             interval = ONE_MINUTE
-            fastestInterval = ONE_MINUTE/4
-            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            fastestInterval = ONE_MINUTE / 4
+            priority = Priority.PRIORITY_HIGH_ACCURACY
 
         }
     }

@@ -7,13 +7,13 @@ import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.GlobalContext
 import org.koin.core.logger.Level
 
-class MySundialApplication : Application(){
+class MySundialApplication : Application() {
 
-    override fun onCreate(){
+    override fun onCreate() {
         super.onCreate()
 
-        GlobalContext.startKoin{
-            androidLogger(if(BuildConfig.DEBUG) Level.ERROR else Level.NONE)
+        GlobalContext.startKoin {
+            androidLogger(if (BuildConfig.DEBUG) Level.ERROR else Level.NONE)
             androidContext(this@MySundialApplication)
             modules(appModule)
         }

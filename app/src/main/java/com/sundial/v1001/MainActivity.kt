@@ -3,6 +3,7 @@ package com.sundial.v1001
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager.PERMISSION_GRANTED
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -17,28 +18,35 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.PopupProperties
 import androidx.core.content.ContextCompat
 import com.firebase.ui.auth.AuthUI
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.sundial.v1001.dto.City
 import com.sundial.v1001.dto.Location
 import com.sundial.v1001.dto.LocationDetails
 import com.sundial.v1001.dto.User
@@ -49,9 +57,10 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MainViewModel by viewModel<MainViewModel>()
-    private val applicationViewModel : ApplicationViewModel by viewModel<ApplicationViewModel>()
+    private val applicationViewModel: ApplicationViewModel by viewModel<ApplicationViewModel>()
     private var firebaseUser: FirebaseUser? = FirebaseAuth.getInstance().currentUser
-    private var user: FirebaseUser? = null
+    private var selectedCity: City? = null
+    private var inLocationName: String = ""
     private val lexendFontFamily = FontFamily(
         Font(R.font.lexendregular, FontWeight.Normal),
         Font(R.font.lexendbold, FontWeight.Bold),
@@ -59,27 +68,28 @@ class MainActivity : ComponentActivity() {
         Font(R.font.lexendlight, FontWeight.Light),
         Font(R.font.lexendmedium, FontWeight.Medium)
     )
-    private var selectedLocation: Location? = null
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            viewModel.fetchCities()
+            firebaseUser?.let {
+                val user = User(it.uid, "")
+                viewModel.user = user
+                viewModel.listenToLocations()
+            }
+
+            val cities by viewModel.cities.observeAsState(initial = emptyList())
+            val locations by viewModel.locations.observeAsState(initial = emptyList())
             val location by applicationViewModel.getLocationLiveData().observeAsState()
-            //val locations by viewModel.locations.observeAsState(initial = emptyList())
-            val locations = ArrayList<Location>()
-            locations.add(Location(locationName = "Home"))
-            locations.add(Location(locationName = "Away"))
-            locations.add(Location(locationName = "Work"))
             SunDialTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    TwilightFacts("Android", location, locations)
+                    LocationFacts(cities, locations, viewModel.selectedLocation, location)
                     LinkButton("https://support.google.com/maps/answer/18539?hl=en&co=GENIE.Platform%3DDesktop", "How do I use Coordinates?")
-                    //SearchBar()
                     LogInButton()
                     WeatherAppButton()
                 }
@@ -89,130 +99,37 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun prepLocationUpdates() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PERMISSION_GRANTED
+        ) {
             requestLocationUpdates()
         } else {
             requestSinglePermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 
-    private val requestSinglePermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()){
-        isGranted ->
-        if (isGranted){
-            requestLocationUpdates()
-        } else{
-            Toast.makeText(this, "GPS Unavailable", Toast.LENGTH_LONG).show()
+    private val requestSinglePermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                requestLocationUpdates()
+            } else {
+                Toast.makeText(this, "GPS Unavailable", Toast.LENGTH_LONG).show()
+            }
         }
-    }
 
     private fun requestLocationUpdates() {
         applicationViewModel.startLocationUpdates()
     }
 
-
     @Composable
-    fun TwilightFacts(name: String, location: LocationDetails?, locations: List<Location> = ArrayList<Location>()) {
-        var sunrise by remember { mutableStateOf("") }
-        var sunset by remember { mutableStateOf("") }
-        var locationName by remember{ mutableStateOf("") }
-        var locationId by remember{ mutableStateOf("") }
-        var currentLatitude = location?.latitude
-        var currentLongitude = location?.longitude
-        val context = LocalContext.current
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(color = Champagne),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                LocationSpinner(locations = locations)
-                OutlinedTextField(
-                    value = sunrise,
-                    onValueChange = { sunrise = it },
-                    label = {
-                        Text(
-                            stringResource(R.string.sunrise),
-                            fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Icon(ImageVector.vectorResource(id = R.drawable.baseline_wb_sunny), contentDescription = "", modifier = Modifier.padding(start = 235.dp))
-                    }
-                )
-                OutlinedTextField(
-                    value = sunset,
-                    onValueChange = { sunset = it },
-                    label = {
-                        Text(
-                            stringResource(R.string.sunset),
-                            fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Icon(ImageVector.vectorResource(id = R.drawable.baseline_bedtime), contentDescription = "", modifier = Modifier.padding(start = 237.dp))
-                    },
-
-                    )
-                Button(
-                    onClick = {
-                        Toast.makeText(context, "$sunrise $sunset", Toast.LENGTH_LONG).show()
-                    }
-                ) {
-                    Text(
-                        text = "Save",
-                        color = Color.White,
-                        fontFamily = lexendFontFamily,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-                OutlinedTextField(
-                    value = locationName,
-                    onValueChange = { locationName = it },
-                    label = {
-                        Text(
-                            text = "Name this Location",
-                            fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp, modifier = Modifier.padding(end = 10.dp)
-                        )
-                        Icon(ImageVector.vectorResource(id = R.drawable.pin_drop), contentDescription = "", modifier = Modifier.padding(start = 240.dp))
-                    }
-                )
-                GPS(location)
-                Button(
-                    onClick = {
-                        //if(firebaseUser == null) {signIn()}
-                            if (currentLongitude != null) {
-                                if (currentLatitude != null) {
-                                    val location = Location(locationId, locationName = locationName, currentLongitude, currentLatitude)
-                                    viewModel.location = location
-                                    viewModel.saveLocation()
-                                }
-                            }
-                        //}
-
-                    }
-                ) {
-                    Text(
-                        text = "Save Location",
-                        color = Color.White,
-                        fontFamily = lexendFontFamily,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-        }
-    }
-
-   @Composable
-    fun LocationSpinner (locations: List<Location>) {
-        var locationText by remember { mutableStateOf("")}
-        var expanded by remember { mutableStateOf(false)}
+    fun LocationSpinner(locations: List<Location>) {
+        var locationText by remember { mutableStateOf("Location Collection") }
+        var expanded by remember { mutableStateOf(false) }
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             Row(Modifier
-                .padding(24.dp)
+                .padding(10.dp)
                 .clickable {
                     expanded = !expanded
                 }
@@ -220,17 +137,312 @@ class MainActivity : ComponentActivity() {
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = locationText, fontSize = 18.sp, modifier = Modifier.padding(end = 8.dp), fontFamily = lexendFontFamily, fontWeight = FontWeight.Medium)
+                Text(
+                    text = locationText,
+                    fontSize = 20.sp,
+                    modifier = Modifier.padding(end = 8.dp),
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.Bold
+                )
                 Icon(imageVector = Icons.Filled.ArrowDropDown, contentDescription = "")
-                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false}) {
-                    locations.forEach {
-                            location -> DropdownMenuItem(onClick = {
-                        expanded = false
-                        locationText = location.toString()
-                        selectedLocation = location
-                    }) {
-                        Text(text = location.toString())
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+                    locations.forEach { location ->
+                        DropdownMenuItem(onClick = {
+                            expanded = false
+                            if (location.locationName == viewModel.newLocation) {
+                                // New Location
+                                locationText = viewModel.newLocation
+                                location.locationName = ""
+                            } else {
+                                // Existing Location
+                                locationText = location.toString()
+                                selectedCity = City(
+                                    country = "",
+                                    cityName = location.locationName,
+                                    id = location.cityId
+                                )
+                                inLocationName = location.locationName
+                            }
+                            viewModel.selectedLocation = location
+                        }) {
+                            Text(
+                                text = location.toString(),
+                                fontFamily = lexendFontFamily,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
                     }
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun TextFieldWithDropdownUsage(
+        dataIn: List<City>,
+        label: String = "",
+        take: Int = 3,
+        selectedLocation: Location = Location()
+    ) {
+
+        val dropDownOptions = remember { mutableStateOf(listOf<City>()) }
+        val textFieldValue =
+            remember(selectedLocation.locationId) { mutableStateOf(TextFieldValue(selectedLocation.locationName)) }
+        val dropDownExpanded = remember { mutableStateOf(false) }
+
+        fun onDropdownDismissRequest() {
+            dropDownExpanded.value = false
+        }
+
+        fun onValueChanged(value: TextFieldValue) {
+            inLocationName = value.text
+            dropDownExpanded.value = true
+            textFieldValue.value = value
+            dropDownOptions.value = dataIn.filter {
+                it.toString().startsWith(value.text) && it.toString() != value.text
+            }.take(take)
+        }
+
+        TextFieldWithDropdown(
+            value = textFieldValue.value,
+            setValue = ::onValueChanged,
+            onDismissRequest = ::onDropdownDismissRequest,
+            dropDownExpanded = dropDownExpanded.value,
+            list = dropDownOptions.value,
+            label = label,
+        )
+    }
+
+    @Composable
+    fun TextFieldWithDropdown(
+        value: TextFieldValue,
+        setValue: (TextFieldValue) -> Unit,
+        onDismissRequest: () -> Unit,
+        dropDownExpanded: Boolean,
+        list: List<City>,
+        label: String = ""
+    ) {
+        Box(modifier = Modifier.padding(top = 5.dp)) {
+            OutlinedTextField(
+                modifier = Modifier
+                    .onFocusChanged { focusState ->
+                        if (!focusState.isFocused)
+                            onDismissRequest()
+                    },
+                value = value,
+                onValueChange = setValue,
+                label = {
+                    Text(
+                        label,
+                        fontFamily = lexendFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                    Icon(
+                        ImageVector.vectorResource(id = R.drawable.pin_drop),
+                        contentDescription = "",
+                        modifier = Modifier.padding(start = 235.dp)
+                    )
+                },
+                colors = TextFieldDefaults.outlinedTextFieldColors()
+            )
+            DropdownMenu(
+                expanded = dropDownExpanded,
+                properties = PopupProperties(
+                    focusable = false,
+                    dismissOnBackPress = true,
+                    dismissOnClickOutside = true
+                ),
+                onDismissRequest = onDismissRequest,
+                modifier = Modifier.background(colorResource(R.color.Gray))
+            ) {
+                list.forEach { text ->
+                    DropdownMenuItem(onClick = {
+                        setValue(
+                            TextFieldValue(
+                                text.toString(),
+                                TextRange(text.toString().length)
+                            )
+                        )
+                        selectedCity = text
+                    }) {
+                        Text(text = text.toString())
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    fun LocationFacts(
+        cities: List<City> = ArrayList<City>(),
+        locations: List<Location> = ArrayList<Location>(),
+        selectedLocation: Location = Location(),
+        currentLocation: LocationDetails?
+    ) {
+        var inSunrise by remember(selectedLocation.locationId) { mutableStateOf(selectedLocation.sunrise) }
+        var inSunset by remember(selectedLocation.locationId) { mutableStateOf(selectedLocation.sunset) }
+        var inLongitude by remember(selectedLocation.longitude) { mutableStateOf(selectedLocation.longitude) }
+        var inLatitude by remember(selectedLocation.latitude) { mutableStateOf(selectedLocation.latitude) }
+        val context = LocalContext.current
+        Box {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                LocationSpinner(locations = locations)
+                GPS(currentLocation)
+                TextFieldWithDropdownUsage(
+                    dataIn = cities,
+                    stringResource(R.string.LocationName),
+                    selectedLocation = selectedLocation
+                )
+                OutlinedTextField(
+                    value = inSunrise,
+                    modifier = Modifier.padding(top = 10.dp),
+                    onValueChange = { inSunrise = it },
+                    label = {
+                        Text(
+                            stringResource(R.string.sunrise),
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                        Icon(
+                            ImageVector.vectorResource(id = R.drawable.baseline_wb_sunny),
+                            contentDescription = "",
+                            modifier = Modifier.padding(start = 235.dp)
+                        )
+                    }
+                )
+                OutlinedTextField(
+                    value = inSunset,
+                    onValueChange = { inSunset = it },
+                    modifier = Modifier.padding(top = 10.dp),
+                    label = {
+                        Text(
+                            stringResource(R.string.sunset),
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                        Icon(
+                            ImageVector.vectorResource(id = R.drawable.baseline_bedtime),
+                            contentDescription = "",
+                            modifier = Modifier.padding(start = 235.dp)
+                        )
+                    }
+                )
+                OutlinedTextField(
+                    value = inLatitude,
+                    onValueChange = { inLatitude = it },
+                    modifier = Modifier.padding(top = 10.dp),
+                    label = {
+                        Text(
+                            stringResource(R.string.latitude),
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                        Icon(
+                            ImageVector.vectorResource(id = R.drawable.baseline_public_24),
+                            contentDescription = "",
+                            modifier = Modifier.padding(start = 235.dp)
+                        )
+                    }
+                )
+                OutlinedTextField(
+                    value = inLongitude,
+                    onValueChange = { inLongitude = it },
+                    modifier = Modifier.padding(top = 10.dp),
+                    label = {
+                        Text(
+                            stringResource(R.string.longitude),
+                            fontFamily = lexendFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                        Icon(
+                            ImageVector.vectorResource(id = R.drawable.baseline_public_24),
+                            contentDescription = "",
+                            modifier = Modifier.padding(start = 235.dp)
+                        )
+                    }
+                )
+                Row(modifier = Modifier.fillMaxSize(), horizontalArrangement = Arrangement.Center) {
+                    Column(
+                        modifier = Modifier
+                            .padding(end = 10.dp)
+                            .padding(top = 10.dp)
+                    ) {
+                        Button(
+                            onClick = {
+                                // Check to see if we have a valid user
+                                if (firebaseUser != null && firebaseUser.toString().isNotEmpty())
+                                {
+                                    selectedLocation.apply {
+                                        sunrise = inSunrise
+                                        sunset = inSunset
+                                        cityId = selectedCity?.id ?: 0
+                                        locationName = inLocationName
+                                        longitude = inLongitude
+                                        latitude = inLatitude
+                                    }
+                                    viewModel.saveLocation()
+                                    Toast.makeText(
+                                        context,
+                                        "$inLocationName $inSunrise $inSunset",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                } else
+                                {
+                                    Toast.makeText(context, "Please Log In to Save a Location", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        ) {
+                            Text(
+                                text = "Save Location",
+                                color = Color.White,
+                                fontFamily = lexendFontFamily,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(end = 5.dp)
+                            )
+                            Icon(
+                                ImageVector.vectorResource(id = R.drawable.baseline_add_24),
+                                contentDescription = "Add",
+                            )
+                        }
+                    }
+                    Column(modifier = Modifier.padding(top = 10.dp)) {
+                        Button(
+                            onClick = {
+                                if (firebaseUser != null && firebaseUser.toString().isNotEmpty())
+                                {
+                                    if(selectedLocation.locationName.isEmpty() || selectedLocation.locationName == ""){
+                                        Toast.makeText(context, "You cannot delete an unsaved location. Please save the location and try again.", Toast.LENGTH_LONG).show()
+                                    } else
+                                    {
+                                        viewModel.deleteLocation(selectedLocation)
+                                    }
+                                }
+                                else
+                                {
+                                    Toast.makeText(context, "Please Log In to Delete a Location", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        ) {
+                            Text(
+                                text = "Delete Location",
+                                color = Color.White,
+                                fontFamily = lexendFontFamily,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(end = 5.dp)
+                            )
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = "Delete"
+                            )
+                        }
                     }
                 }
             }
@@ -266,6 +478,20 @@ class MainActivity : ComponentActivity() {
     private @Composable
     fun GPS(location: LocationDetails?) {
         location?.let {
+            Column(modifier = Modifier.padding(bottom = 5.dp)) {
+                Text(
+                    text = "Current Latitude:   " + location.latitude,
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp
+                )
+            }
+            Column(modifier = Modifier.padding(bottom = 5.dp)) {
+                Text(
+                    text = "Current Longitude:  " + location.longitude,
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp
             Text(text = location.latitude)
             Text(text = location.longitude)
         }
@@ -294,41 +520,7 @@ class MainActivity : ComponentActivity() {
 
 
     @Composable
-    fun SearchBar() {
-        var text by remember { mutableStateOf("") }
-        val lexendFontFamily = FontFamily(Font(R.font.lexendbold, FontWeight.Bold))
-        Surface(
-            elevation = 4.dp
-        ) {
-            Row(
-                modifier = Modifier
-                    .background(color = Orange)
-                    .fillMaxWidth()
-                    .padding(16.dp)
-
-            ) {
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = { text = it },
-                    label = {
-                        Text(
-                            text = "Search Location",
-                            fontFamily = lexendFontFamily,
-                            fontWeight = FontWeight.Bold
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-
-                )
-            }
-        }
-    }
-
-
-    @Composable
     fun LogInButton() {
-        val lexendFontFamily = FontFamily(Font(R.font.lexendmedium, FontWeight.Medium))
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -337,29 +529,42 @@ class MainActivity : ComponentActivity() {
                 onClick = { signIn() },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(16.dp)
+                    .padding(10.dp)
             ) {
-                Text(text = "Log in", fontFamily = lexendFontFamily, fontWeight = FontWeight.Medium)
+                Text(
+                    text = "Log in",
+                    fontFamily = lexendFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+
             }
         }
     }
 
-    @Preview(showBackground = true)
+
+    @Preview(name = "Light Mode", showBackground = true)
+    @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true, name = "Dark Mode")
     @Composable
     fun DefaultPreview() {
+        val cities by viewModel.cities.observeAsState(initial = emptyList())
         val location by applicationViewModel.getLocationLiveData().observeAsState()
         val locations = ArrayList<Location>()
         locations.add(Location(locationName = "Home"))
         locations.add(Location(locationName = "Away"))
         locations.add(Location(locationName = "Work"))
         SunDialTheme {
-            TwilightFacts("Android", location, locations)
-            LogInButton()
-            SearchBar()
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colors.background
+            ) {
+                LocationFacts(cities, locations, viewModel.selectedLocation, location)
+                LogInButton()
+            }
         }
     }
-    
-    private fun signIn(){
+
+    private fun signIn() {
         val providers = arrayListOf(
             AuthUI.IdpConfig.EmailBuilder().build(),
             AuthUI.IdpConfig.GoogleBuilder().build()
@@ -374,17 +579,20 @@ class MainActivity : ComponentActivity() {
 
     private val signInLauncher = registerForActivityResult(
         FirebaseAuthUIActivityResultContract()
-    ) {
-            res -> this.signInResult(res)
+    ) { res ->
+        this.signInResult(res)
     }
-    private fun signInResult(result: FirebaseAuthUIAuthenticationResult){
+
+    private fun signInResult(result: FirebaseAuthUIAuthenticationResult) {
         val response = result.idpResponse
-        if (result.resultCode == RESULT_OK){
+        if (result.resultCode == RESULT_OK) {
             firebaseUser = FirebaseAuth.getInstance().currentUser
-            firebaseUser?.let{
+            firebaseUser?.let {
                 val user = User(it.uid, it.displayName)
                 viewModel.user = user
                 viewModel.saveUser()
+                Toast.makeText(this, "Welcome, ${viewModel.user!!.displayName}", Toast.LENGTH_LONG)
+                    .show()
             }
         } else {
             Log.e("MainActivity.kt", "Error logging in " + response?.error?.errorCode)
