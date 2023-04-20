@@ -89,6 +89,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     LocationFacts(cities, locations, viewModel.selectedLocation, location)
+                    LinkButton("https://support.google.com/maps/answer/18539?hl=en&co=GENIE.Platform%3DDesktop", "How do I use Coordinates?")
                     LogInButton()
                     WeatherAppButton()
                 }
