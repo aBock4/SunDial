@@ -3,9 +3,9 @@ package com.sundial.v1001
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-object RetrofitClientInstance {
+object CityRetrofitClientInstance {
     private var retrofit: Retrofit? = null
-    private const val BASE_URL = "https://api.sunrise-sunset.org/"
+    private const val BASE_URL = "https://pkgstore.datahub.io/"
 
     val retrofitInstance: Retrofit?
         get() {
